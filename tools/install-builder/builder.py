@@ -16,20 +16,22 @@ def gui():
     import tkinter as tk
     from tkinter import ttk, filedialog, messagebox
     root = tk.Tk(); root.title('CH: Encore — Install Builder')
-    root.geometry('860x760'); root.minsize(760, 740); root.configure(bg='#151b24')
+    root.geometry('860x760'); root.minsize(760, 740); root.configure(bg='#081c3a')
     style = ttk.Style(); style.theme_use('clam')
-    style.configure('.', background='#151b24', foreground='#ecf0f5', font=('Segoe UI', 11))
-    style.configure('TEntry', fieldbackground='#242e3b', foreground='#ffffff', padding=7)
-    style.configure('TCombobox', fieldbackground='#242e3b', background='#242e3b', foreground='#ffffff', padding=7)
-    style.map('TCombobox', fieldbackground=[('readonly', '#242e3b')])
-    style.configure('TButton', background='#2e4056', padding=(16, 9))
-    style.map('TButton', background=[('active', '#3b5470'), ('disabled', '#242a32')],
+    style.configure('.', background='#081c3a', foreground='#ecf0f5', font=('Segoe UI', 11))
+    style.configure('TEntry', fieldbackground='#102d50', foreground='#ffffff', padding=7)
+    style.configure('TCombobox', fieldbackground='#102d50', background='#102d50', foreground='#ffffff', padding=7)
+    style.map('TCombobox', fieldbackground=[('readonly', '#102d50')])
+    style.configure('TButton', background='#194671', padding=(16, 9))
+    style.map('TButton', background=[('active', '#245d91'), ('disabled', '#14263c')],
               foreground=[('disabled', '#8591a0'), ('!disabled', '#ecf0f5')])
     style.configure('Title.TLabel', font=('Segoe UI', 25, 'bold'))
     style.configure('Sub.TLabel', foreground='#aebac9')
-    style.configure('TRadiobutton', padding=(0, 7), background='#151b24')
-    style.map('TRadiobutton', background=[('active', '#151b24')])
-    style.configure('TProgressbar', background='#58b38b', troughcolor='#242e3b')
+    style.configure('TCheckbutton', background='#081c3a')
+    style.map('TCheckbutton', background=[('active', '#081c3a')])
+    style.configure('TRadiobutton', padding=(0, 7), background='#081c3a')
+    style.map('TRadiobutton', background=[('active', '#081c3a')])
+    style.configure('TProgressbar', background='#58b38b', troughcolor='#102d50')
     pane = ttk.Frame(root, padding=26); pane.pack(fill='both', expand=True)
     ttk.Label(pane, text='CH: ENCORE', style='Title.TLabel').pack(anchor='w')
     ttk.Label(pane, text='Create your personal PS5 install', style='Sub.TLabel').pack(anchor='w', pady=(2, 18))
@@ -60,7 +62,7 @@ def gui():
     acknowledge = tk.BooleanVar()
     consent = ttk.Checkbutton(pane, text='I have permission to extract and use these local PC resources.', variable=acknowledge)
     consent.pack(anchor='w', pady=(3, 9))
-    logbox = tk.Text(pane, height=5, bg='#0f141c', fg='#c9d6e4', font=('Consolas', 10),
+    logbox = tk.Text(pane, height=5, bg='#06142b', fg='#c9d6e4', font=('Consolas', 10),
                      relief='flat', wrap='word', padx=12, pady=10, state='disabled')
     logbox.pack(fill='both', expand=True, pady=(0, 10))
     status = tk.StringVar(value='Ready')
