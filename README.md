@@ -15,6 +15,8 @@ A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 3. Copy `EncoreAssets-v1.encore-assets` to the root of an exFAT USB drive. Open the game and select **Import** on the setup screen.
 4. Add your own charts through Encore Browser, `/data/homebrew/SONGS`, or a root-level `SONGS` folder on an exFAT drive. Nested collections are supported.
 
+I wish I could supply a fully built game, but have been asked not to include any assets in the project. Good news, after initial install updates are automatic in-game!
+
 The initial setup screen uses the included open font and needs no PC resources. Imported assets, songs, profiles and scores are kept in persistent storage, outside the application and update runtime. Package/image installs use the same persistent location as folder installs.
 
 ## Features
