@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 HOWL
 # SPDX-License-Identifier: MIT
-"""Freeze a verified desktop-builder bundle into one self-contained Windows EXE.
+"""Freeze a verified desktop-builder bundle into one Windows EXE.
 
 Run with native Windows CPython 3.12 x64 and PyInstaller 6.16.0. --packwright
 must be an unmodified self-contained win-x64 publish of the pinned source.
-The executable embeds its complete source/notices, tools and Python packages.
+The executable embeds exFAT tools, their complete source/notices and Python.
+PKG uses a verified first-use download of the native writer, then its cache.
 """
 import argparse
 import hashlib
@@ -49,7 +50,7 @@ def build(bundle, tools, source, output):
         shutil.copytree(tools,embedded/'packwright')
         shutil.copy2(source,embedded/'Packwright-source.zip')
         manifest={'schema':1,'engine':'packwright','version':'1.3.0','source':PACKWRIGHT_REV,
-                  'executable':'packwright/Packwright.exe','files':{}}
+                  'executable':'packwright/Packwright.exe','pkg_policy':'verified-download','files':{}}
         for path in sorted(embedded.rglob('*')):
             if path.is_file():manifest['files'][path.relative_to(embedded).as_posix()]=digest(path)
         (embedded/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
@@ -84,7 +85,8 @@ def build(bundle, tools, source, output):
         shutil.copy2(executable,output)
     return {'exe':output.name,'bytes':output.stat().st_size,'sha256':digest(output),
             'game_source':template['source'],'packwright_source':PACKWRIGHT_REV,'single_file':True,'python_install_required':False,
-            'packaging_downloads_required':False,'original_pc_resources_included':False}
+            'folder_exfat_downloads_required':False,'pkg_first_use_download_required':True,
+            'original_pc_resources_included':False}
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--bundle',type=Path,required=True)

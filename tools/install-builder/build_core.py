@@ -197,6 +197,7 @@ def run_process(command, cancel, log, env=None):
             if result.strip(): log(result.strip())
             if process.returncode:
                 raise ValueError('Packaging tool failed. See the build log above.')
+            return result
         finally:
             if process.poll() is None:
                 process.kill(); process.wait()

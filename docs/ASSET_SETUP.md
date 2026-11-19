@@ -6,13 +6,13 @@ Use only resources you have permission to extract and use. Possession of a PC in
 
 ## Build on Windows
 
-Download **CH_Encore_1.5.2_Install_Builder.exe** and double-click it. It bundles Python 3.12, the importer and its dependencies, the asset-free game template, and the packaging tools. **No ZIP extraction, Python installation, compiler or dependency downloads are required.** It builds offline on Windows x64 after the initial download.
+Download **CH_Encore_1.5.2_Install_Builder.exe** and double-click it. It bundles Python 3.12, the importer and its dependencies, the asset-free game template, and offline exFAT tools. **No ZIP extraction, Python installation or compiler is required.** Folder and exFAT builds work offline on Windows x64. PKG creation automatically downloads and verifies its native writer on first use, then uses its cache.
 
 1. Choose a detected installation, or **Browse** to your standalone/portable installation or launcher-managed game folder. You can select its `*_Data` folder directly.
 2. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**.
 3. Confirm permission to use the local resources, then select **Build install**.
 
-The included Packwright backend is built from pinned open source and runs as a separate process. Its source/licence/notices are embedded alongside the tool; no modules are injected into the game. The new bundled PKG backend requires a fresh physical PS5 installation test. Desktop validation alone does not establish console compatibility.
+The included Packwright exFAT backend is built from pinned open source and runs as a separate process. Its source/licence/notices are embedded alongside the tool; no modules are injected into the game. Native PKG installation and a 240-frame launch were checked on a PS5 Pro using the proven writer. Broader firmware/launcher testing is still needed.
 
 ## Source builder / Linux and macOS
 

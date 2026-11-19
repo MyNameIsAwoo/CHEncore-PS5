@@ -133,11 +133,21 @@ class BuilderTests(unittest.TestCase):
                     'files': {'packwright/Packwright.exe': core.sha_file(tool)}}
         (tools / 'manifest.json').write_text(json.dumps(manifest))
         with patch.object(backends, 'HERE', self.bundle), patch.object(backends, 'download', side_effect=AssertionError('unexpected download')):
-            result = backends.prepare_backend('pkg', None, None, threading.Event(), lambda _: None)
+            result = backends.prepare_backend('exfat', None, None, threading.Event(), lambda _: None)
             self.assertEqual(result, {'packwright': tool})
             tool.write_bytes(b'damaged')
             with self.assertRaisesRegex(ValueError, 'damaged'):
                 backends.prepare_backend('exfat', None, None, threading.Event(), lambda _: None)
+        tool.write_bytes(b'fixture'); manifest['pkg_policy'] = 'verified-download'
+        (tools / 'manifest.json').write_text(json.dumps(manifest))
+        with patch.object(backends, 'HERE', self.bundle), patch.object(sys, 'frozen', True, create=True), \
+             patch.object(backends.platform, 'system', return_value='Windows'), patch.object(backends.platform, 'machine', return_value='AMD64'), \
+             patch.object(backends, 'download', side_effect=ValueError('selected verified native writer')) as download:
+            with self.assertRaisesRegex(ValueError, 'selected verified native writer'):
+                backends.prepare_backend('pkg', self.root / 'cache', None, threading.Event(), lambda _: None)
+            self.assertIn('PS5-UltraPack-2.6.1-windows-x64.zip', download.call_args.args[0])
+        with self.assertRaisesRegex(ValueError, 'only qualified for exFAT'):
+            backends.package('pkg', None, None, {'packwright': tool}, threading.Event(), lambda _: None)
         with patch.object(backends, 'HERE', self.root / 'absent'), patch.object(sys, 'frozen', True, create=True):
             with self.assertRaisesRegex(ValueError, 'missing its embedded'):
                 backends.prepare_backend('pkg', None, None, threading.Event(), lambda _: None)

@@ -57,6 +57,7 @@ def prepare_backend(kind, cache, pkg_tool, cancel, log):
     if kind == 'folder':
         return None
     embedded = HERE / 'embedded-tools'
+    allow_pkg_download = False
     if (embedded / 'manifest.json').is_file() and not pkg_tool:
         manifest = json.loads((embedded / 'manifest.json').read_text(encoding='utf-8'))
         if manifest.get('schema') != 1 or manifest.get('engine') != 'packwright':
@@ -70,9 +71,15 @@ def prepare_backend(kind, cache, pkg_tool, cancel, log):
             path = embedded / name
             if not path.is_file() or path.is_symlink() or sha_file(path) != wanted:
                 raise ValueError('An embedded packaging file is missing or damaged: ' + name)
-        return {'packwright': embedded / executable}
+        # The embedded engine is qualified for exFAT. Its native PKG writer
+        # omits installation metadata, so PKG uses the verified native writer
+        # automatically cached from its official release instead.
+        allow_pkg_download = kind == 'pkg' and manifest.get('pkg_policy') == 'verified-download'
+        if not allow_pkg_download:
+            if kind == 'pkg': raise ValueError('The executable needs its verified PKG backend configuration.')
+            return {'packwright': embedded / executable}
     import sys
-    if getattr(sys, 'frozen', False) and not pkg_tool:
+    if getattr(sys, 'frozen', False) and not pkg_tool and not allow_pkg_download:
         raise ValueError('The self-contained builder is missing its embedded tools. Download it again.')
     cache = Path(cache) if cache is not None else cache_directory()
     if kind == 'exfat':
@@ -113,6 +120,8 @@ def prepare_backend(kind, cache, pkg_tool, cancel, log):
 
 def package(kind, app, output, backend, cancel, log):
     if isinstance(backend, dict):
+        if kind != 'exfat':
+            raise ValueError('The embedded engine is only qualified for exFAT; use the verified native PKG writer.')
         tool = backend['packwright']
         env = dict(os.environ, PACKWRIGHT_DATA=str(app.parent / 'packaging-state'),
                    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT='1', DOTNET_CLI_TELEMETRY_OPTOUT='1')
@@ -167,9 +176,8 @@ def package(kind, app, output, backend, cancel, log):
             raise ValueError('The package writer did not produce exactly one PKG.')
         # Nonzero process status is necessary but the writer also reports its
         # structural validation result as JSON; explicitly reject failures.
-        result = work / 'validation.json'
-        run_process(helper_command('validate-pkg', backend, files[0], result), cancel, log, env)
-        if json.loads(result.read_text())['fail']:
+        validation = json.loads(run_process([backend, 'validate', files[0], '--json'], cancel, log, env))
+        if not isinstance(validation.get('fail'), int) or validation['fail']:
             raise ValueError('Native package validation failed.')
         files[0].replace(output)
 

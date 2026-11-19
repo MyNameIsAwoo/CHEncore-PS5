@@ -12,14 +12,14 @@ A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 
 **[Download the Windows Install Builder (.exe)](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/download/v1.5.2/CH_Encore_1.5.2_Install_Builder.exe)** · [Release notes](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/tag/v1.5.2) · [Detailed setup guide](docs/ASSET_SETUP.md)
 
-**One executable. No ZIP extraction, Python installation or dependency downloads.** It includes the asset-free game template and everything needed to create your personal install on Windows x64. Your PC assets are read locally and are never supplied by this project.
+**One executable. No ZIP extraction or Python installation.** It includes the asset-free game template and everything needed to create your personal install on Windows x64. Your PC assets are read locally and are never supplied by this project.
 
 1. Download **CH_Encore_1.5.2_Install_Builder.exe** and double-click it.
 2. Select a detected PC game installation, or choose **Browse** for a custom location. Select the installed game folder or its `*_Data` folder. Only the resource version supported by the importer is accepted.
 3. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**. Confirm permission to use your local resources, then select **Build install**.
 4. Install the resulting `PPSA99200` folder, `.exfat` image or `.pkg` using your compatible PS5 homebrew setup. Keep the complete title folder intact. **First launch prepares your included assets automatically**; no separate console asset transfer or import selection is needed.
 
-The Windows executable can build offline once downloaded. It does not install another desktop app or require administrator access. Native PKGs are homebrew/debug packages, not retail-signed applications; the bundled packaging backend still needs a fresh physical PS5 install test.
+Folder and exFAT builds work offline once the executable is downloaded. PKG creation automatically downloads and verifies the proven native packaging tool on first use, then reuses its cache. It does not install another desktop app or require administrator access. Native PKGs are homebrew/debug packages, not retail-signed applications; the native packaging path was checked on a PS5 Pro with a bounded 240-frame launch; other setups still need testing.
 
 **Songs are separate.** No songs are included or imported from the PC installation. Add authorized charts through Encore Browser, `/data/homebrew/SONGS`, or a root-level `SONGS` folder on an exFAT drive. Nested collections are supported.
 

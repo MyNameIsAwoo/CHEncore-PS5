@@ -51,8 +51,12 @@ def gui():
     for value, text in [('folder', 'Game folder'), ('exfat', 'exFAT image'), ('pkg', 'Native homebrew PKG / fPKG')]:
         radio = ttk.Radiobutton(formats, text=text, variable=kind, value=value)
         radio.pack(side='left', padx=(0, 24)); radios.append(radio)
-    ttk.Label(pane, text='Your assets are added on this PC. No separate asset file or import selection on the console.',
-              style='Sub.TLabel', wraplength=790).pack(anchor='w', pady=(0, 8))
+    format_hint = tk.StringVar(value='Your assets are added on this PC. No separate asset file or import selection on the console.')
+    ttk.Label(pane, textvariable=format_hint, style='Sub.TLabel', wraplength=790).pack(anchor='w', pady=(0, 8))
+    def update_format_hint(*_):
+        format_hint.set('PKG: first use automatically downloads a verified tool; later builds use its cache.' if kind.get() == 'pkg' else
+                        'Your assets are added on this PC. No separate asset file or import selection on the console.')
+    kind.trace_add('write', update_format_hint)
     acknowledge = tk.BooleanVar()
     consent = ttk.Checkbutton(pane, text='I have permission to extract and use these local PC resources.', variable=acknowledge)
     consent.pack(anchor='w', pady=(3, 9))
@@ -187,9 +191,10 @@ def main():
         config = template_config(args.bundle)
         with tempfile.TemporaryDirectory(prefix='encore-self-check-') as directory:
             unpack_template(args.bundle, Path(directory), config, threading.Event())
-        backend = prepare_backend('pkg', None, None, threading.Event(), print)
+        backend = prepare_backend('exfat', None, None, threading.Event(), print)
         if not isinstance(backend, dict): raise ValueError('This executable needs its embedded packaging backend.')
-        print('PASS self-contained game template and packaging tools; Python ' + sys.version.split()[0])
+        print('PASS bundled game template and offline exFAT tools; Python ' + sys.version.split()[0])
+        print('PKG uses an automatically verified first-use tool download, then its cache.')
         return 0
     if args.detect:
         for folder in detect_installations(): print(folder)
