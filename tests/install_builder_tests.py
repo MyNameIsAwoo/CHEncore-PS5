@@ -116,7 +116,9 @@ class BuilderTests(unittest.TestCase):
         hidden = self.root / 'launcher/songs/hidden/Clone Hero_Data'
         hidden.mkdir(parents=True); (hidden / 'resources.assets').write_bytes(b'fixture')
         found = core.detect_installations([self.root / 'launcher', self.game.parent, self.game])
-        self.assertEqual(set(found), {launcher, self.game})
+        # Hosted Windows runners may expose TEMP through an 8.3 alias; compare
+        # resolved identities, just as installation detection does.
+        self.assertEqual(set(found), {launcher.resolve(), self.game.resolve()})
         event = threading.Event(); event.set()
         self.assertEqual(core.detect_installations([self.root], event), [])
 
