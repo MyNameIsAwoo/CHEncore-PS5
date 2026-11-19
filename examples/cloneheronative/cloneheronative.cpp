@@ -10876,7 +10876,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 contentHeight+=line.height+(i?14:0);
             }
             const float bodyHeight=padding*2+contentHeight+(busy?30:0)+(state==State::Installing?0:54);
-            constexpr float y=64; // Keep update text above the main-menu logo.
+            constexpr float y=12; // Keep update text just below the top edge, above the logo.
             draw->AddRectFilled(p(x,y),p(x+w,y+header),IM_COL32(8,8,8,255));
             draw->AddRectFilled(p(x,y+header+gap),p(x+w,y+header+gap+bodyHeight),IM_COL32(22,22,22,153));
             draw->AddText(face,32*scale,p(960-tw*.5f,y+16),white,heading);
