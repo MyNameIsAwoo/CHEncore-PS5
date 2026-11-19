@@ -12,13 +12,16 @@
 #include <pthread.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifndef PS5_APP_ROOT
+#define PS5_APP_ROOT "/app0"
+#endif
 namespace {
 class AssetSetup final:public VulkanExampleBase {
 public:
  std::string work,package,message,installedRoot;
  std::atomic<bool> done{false},cancel{false};std::atomic<double> progress{0};
  std::array<pad,PAD_PLAYERS> pads{};
- pthread_t worker{};bool running{},success{},ready{};double nextScan{};
+ pthread_t worker{};bool running{},success{},ready{},bundledAttempted{};double nextScan{};
  explicit AssetSetup(std::string directory):work(std::move(directory)) {
   title="CH: Encore";name="asset-setup";apiVersion=VK_API_VERSION_1_3;
   useDynamicRendering=true;deviceCreatepNextChain=&baseDynamicRenderingFeatures;
@@ -43,6 +46,14 @@ public:
    if(success){rhythm::assets::setCurrentRoot(installedRoot);ready=true;quit=true;return;}
   }
   if(!running && now_seconds()>=nextScan){nextScan=now_seconds()+1;package.clear();
+   // Personal desktop builds carry their pack inside the title. Keep the
+   // immutable base path as a fallback when an updated runtime supplies assets/.
+   for(const auto& path:{getAssetPath()+"EncoreAssets-v1.encore-assets",std::string(PS5_APP_ROOT "/assets/EncoreAssets-v1.encore-assets")}){
+    struct stat st{};if(!stat(path.c_str(),&st) && S_ISREG(st.st_mode)){
+     package=path;if(!bundledAttempted){bundledAttempted=true;beginImport();}break;
+    }
+   }
+   if(package.empty())
    for(const auto& path:{std::string(CH_DATA_ROOT "/EncoreAssets-v1.encore-assets"),std::string("/data/homebrew/EncoreAssets-v1.encore-assets")}){
     struct stat st{};if(!stat(path.c_str(),&st) && S_ISREG(st.st_mode)){package=path;break;}
    }
@@ -76,11 +87,15 @@ public:
   ImGui::Begin("Asset setup",nullptr,ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize);
   ImGui::SetWindowFontScale(1.4f);
   ImGui::TextUnformatted("CH: ENCORE");ImGui::Separator();ImGui::Spacing();
-  ImGui::TextUnformatted("IMPORT YOUR PC ASSETS");ImGui::Spacing();ImGui::PushTextWrapPos(0);
+  ImGui::TextUnformatted(bundledAttempted?"PREPARING YOUR INSTALLATION":"IMPORT YOUR PC ASSETS");ImGui::Spacing();ImGui::PushTextWrapPos(0);
+  if(bundledAttempted){
+   ImGui::TextUnformatted("Preparing the personal assets included by your desktop builder. This happens once; future code updates keep them.");
+  }else{
   ImGui::TextUnformatted("Artwork, fonts and sound effects are supplied by your own PC installation. They are not included in this download.");
   ImGui::Spacing();ImGui::TextUnformatted("1. Run the desktop asset importer on your PC game folder.");
   ImGui::TextUnformatted("2. Copy EncoreAssets-v1.encore-assets to an exFAT USB drive.");
   ImGui::TextUnformatted("3. Connect the drive, then select Import. Songs are separate.");
+  }
   ImGui::Spacing();
   if(running){ImGui::TextUnformatted("Importing assets...");ImGui::ProgressBar(float(progress.load()),ImVec2(-1,20*scale));ImGui::TextUnformatted("Circle: Cancel");}
   else{

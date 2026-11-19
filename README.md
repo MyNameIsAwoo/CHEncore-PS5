@@ -6,16 +6,19 @@ Huge thanks to my cousin, [Eddie Rubio](https://music.youtube.com/channel/UCmQMU
 
 A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 
-**v1.5.0 — pursuaded** changes to user-supplied PC resources. No original PC artwork, fonts, sound effects or songs are included in the game, source tree or release packages. The old main-menu screenshots have been removed.
+**v1.5.1 — Personal install builder** moves asset setup onto your PC. The public download contains an asset-free game template and a desktop builder. Your own authorized PC resources are added locally to a folder install, exFAT image or native homebrew PKG. No original PC resources or songs are supplied by this project.
 
 ## Getting started
 
-1. Download a game-folder ZIP, exFAT image or native homebrew PKG from [Releases](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases).
-2. Read [Asset setup](docs/ASSET_SETUP.md). Use the desktop importer only with PC resources you are authorized to extract and use. It does not decrypt protected songs or bypass access controls.
-3. Copy `EncoreAssets-v1.encore-assets` to the root of an exFAT USB drive. Open the game and select **Import** on the setup screen.
-4. Add your own charts through Encore Browser, `/data/homebrew/SONGS`, or a root-level `SONGS` folder on an exFAT drive. Nested collections are supported.
+1. Download and extract the **desktop-builder ZIP** from [Releases](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases).
+2. Run **Start-Builder.cmd** on Windows (Python 3.10+), or **Start-Builder.sh** on Linux/macOS.
+3. Select a detected PC installation or Browse to yours, choose an output folder and install format, then select **Build install**. Only the fingerprinted resource version supported by the importer is accepted.
+4. Install your generated folder/image/package with your compatible PS5 homebrew setup. Its included personal assets are prepared automatically at first launch—no separate console asset transfer is needed.
+5. Add your own authorized charts through Encore Browser, `/data/homebrew/SONGS`, or an exFAT root-level `SONGS` folder. Nested collections are supported.
 
-The initial setup screen uses the included open font and needs no PC resources. Imported assets, songs, profiles and scores are kept in persistent storage, outside the application and update runtime. Package/image installs use the same persistent location as folder installs.
+Read [Asset setup](docs/ASSET_SETUP.md) for requirements and supported platforms. Generated personal installs contain your imported resources and must stay private. Only the unmodified public builder is shareable. No permission to extract/reuse the original resources or developer approval is claimed; see [rights and distribution](docs/RIGHTS_AND_DISTRIBUTION.md).
+
+Already imported assets, songs, profiles and scores remain in persistent storage, outside code/runtime updates. Existing installations can continue using normal in-game updates without rebuilding.
 
 ## Features
 

@@ -17,6 +17,7 @@ userdata/
 # User-supplied resources and importer output must never be committed.
 *.encore-assets
 *.encore-assets.tmp
+CH_Encore_*_Personal_*/
 assets/pc_*/
 assets/Sprite/
 assets/Texture2D/

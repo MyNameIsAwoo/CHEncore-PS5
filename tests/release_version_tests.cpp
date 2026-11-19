@@ -13,7 +13,8 @@ int main(){using namespace rhythm::updates;ReleaseVersion a,b,c;
  assert(releaseVersion("beta-v1.0.2",a) && a.code==10004);
  assert(releaseVersion("beta-v1.1",b) && b.code>a.code);
  assert(releaseVersion("beta-v2.0",c) && c.code>b.code);
- ReleaseVersion current;assert(releaseVersion("v1.5.0",current) && current.code==10501 && current.code==applicationVersion && current.label==applicationVersionLabel && current.prefix=="CH_Encore_1.5.0");
+ ReleaseVersion previous;assert(releaseVersion("v1.5.0",previous) && previous.code==10501);
+ ReleaseVersion current;assert(releaseVersion("v1.5.1",current) && current.code==10503 && current.code==applicationVersion && current.label==applicationVersionLabel && current.prefix=="CH_Encore_1.5.1" && current.code>previous.code);
  for(const char* invalid:{"","alpha-v0","alpha-v1000","beta-v1","beta-v0.1","beta-v01.0","beta-v1.00","beta-v1.0.50","beta-v1.0.","beta-v1.0.1.2","v999.0","v1.0-rc1","../beta-v1.0"})assert(!releaseVersion(invalid,a));
  puts("PASS alpha/beta/stable ordering, patch versions, release labels/asset names and malformed version rejection");
 }

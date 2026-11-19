@@ -46,7 +46,22 @@ def prepare_output(output,game_data):
     return output
 
 
-def export(game_data,output,recipe_path):
+def verify_source(game_data,recipes,check=lambda:None):
+    game_data=Path(game_data).resolve()
+    if not (game_data/'resources.assets').is_file():
+        choices=[p for p in game_data.glob('*_Data') if (p/'resources.assets').is_file()]
+        if len(choices)!=1:raise ValueError('Select the PC installation folder or its *_Data folder.')
+        game_data=choices[0]
+    for name,wanted in recipes['source_files'].items():
+        check()
+        source=game_data/name
+        if not source.is_file() or sha_file(source)!=wanted:
+            raise ValueError('Unsupported or incomplete PC asset version: '+name+'. The original installation is unchanged.')
+    return game_data
+
+
+def export(game_data,output,recipe_path,*,log=print,check=lambda:None):
+    check()
     try:
         import UnityPy
         from PIL import Image
@@ -54,15 +69,8 @@ def export(game_data,output,recipe_path):
         raise ValueError('Install the importer dependencies first: python -m pip install -r requirements.txt') from exc
     if UnityPy.__version__!='1.25.4':raise ValueError('This importer requires UnityPy 1.25.4; use requirements.txt.')
     recipes=load_recipes(recipe_path)
-    if not (game_data/'resources.assets').is_file():
-        choices=[p for p in game_data.glob('*_Data') if (p/'resources.assets').is_file()]
-        if len(choices)!=1:raise ValueError('Select the PC installation folder or its *_Data folder.')
-        game_data=choices[0]
-    for name,wanted in recipes['source_files'].items():
-        source=game_data/name
-        if not source.is_file() or sha_file(source)!=wanted:
-            raise ValueError('Unsupported or incomplete PC asset version: '+name+'. The original installation is unchanged.')
-    print('PC assets verified. Exporting your personal asset pack...',flush=True)
+    game_data=verify_source(game_data,recipes,check)
+    log('PC assets verified. Exporting your personal asset pack...')
     env=UnityPy.load(*(str(game_data/name) for name in recipes['source_files']))
     objects={(o.assets_file.name,o.path_id):o for o in env.objects}
     def source_image(record):
@@ -73,6 +81,7 @@ def export(game_data,output,recipe_path):
     with tempfile.TemporaryDirectory(prefix='ch-assets-',dir=output.parent) as temporary:
         work=Path(temporary);files=[]
         for i,r in enumerate(recipes['assets']):
+            check()
             target=work/r['path'];target.parent.mkdir(parents=True,exist_ok=True)
             if r['kind']=='copy':
                 original=game_data/r['file']
@@ -102,18 +111,19 @@ def export(game_data,output,recipe_path):
             size=target.stat().st_size
             if not 0<size<=32*1024**2:raise ValueError('Invalid exported file size')
             files.append({'path':r['path'],'size':size,'sha256':sha_file(target)})
-            if i%20==0 or i+1==len(recipes['assets']):print(f'Exported {i+1}/{len(recipes["assets"])}',flush=True)
+            if i%20==0 or i+1==len(recipes['assets']):log(f'Exported {i+1}/{len(recipes["assets"])}')
         if sum(x['size'] for x in files)>128*1024**2:raise ValueError('Asset pack is too large')
         manifest=json.dumps({'schema':1,'catalog':recipes['catalog'],'files':files},separators=(',',':'),ensure_ascii=False).encode()
         packed=work/'finished.pack'
         with packed.open('wb') as f:
             f.write(b'CHASSET1'+struct.pack('<I',len(manifest))+manifest)
             for record in files:
+                check()
                 with (work/record['path']).open('rb') as source:shutil.copyfileobj(source,f,1024*1024)
             f.flush();os.fsync(f.fileno())
         packed.replace(output)
-    print(f'Created {output.name} ({output.stat().st_size/1000000:.1f} MB). Copy it to the root of an exFAT USB drive.',flush=True)
-    print('The pack contains your imported assets. Keep it private; do not upload it to the project.',flush=True)
+    log(f'Created {output.name} ({output.stat().st_size/1000000:.1f} MB).')
+    log('The pack contains your imported assets. Keep it private; do not upload it to the project.')
     return files
 
 

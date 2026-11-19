@@ -1,33 +1,37 @@
-# User asset setup
+# Personal install builder
 
-CH: Encore v1.5.0 ships without original PC artwork, fonts, sound effects or songs. Its setup screen works without them.
+The public CH: Encore download contains the desktop builder and an **asset-free game template**. It does not contain original PC artwork, fonts, effects or songs. The builder reads your own local resources and creates a personal install in the format you choose.
 
-Use only resources you have permission to extract and use. Owning or downloading a copy of the PC game does not by itself establish that permission. The importer is not a way to bypass the original developer’s licence restrictions. Read [rights and distribution notes](RIGHTS_AND_DISTRIBUTION.md).
+Use only resources you have permission to extract and use. Possession of a PC installation does not itself grant that permission or resolve the original licence restrictions. See [rights and distribution notes](RIGHTS_AND_DISTRIBUTION.md).
 
-## On the PC
+## Build on your PC
 
-Download and extract `CH_Encore_1.5.0_asset-importer.zip`. Install Python 3.10 or newer. Open a terminal in the importer folder:
+1. Download and extract the complete **desktop-builder ZIP** outside your PC game installation.
+2. Install Python 3.10 or newer if needed. On Windows, double-click **Start-Builder.cmd**. On Linux/macOS, run **Start-Builder.sh** (Python needs Tk and venv support).
+3. Choose a detected installation, or use **Browse** to select your standalone/portable installation or a launcher-managed game folder. You can select its `*_Data` folder directly. Browse is needed for locations outside the bounded common-folder scan.
+4. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**. The PKG backend currently supports Windows/Linux x64; folder and exFAT creation use portable Python.
+5. Confirm permission to use the local resources, then select **Build install**.
 
-```powershell
-py -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe create_asset_pack.py "C:\path\to\your\PC game"
-```
+The Windows launcher creates a local Python environment and installs pinned dependencies. On first exFAT/PKG build, verified open-source packaging tools are downloaded from their official release/source archives into the desktop tool cache. No administrator access or WSL is required. Tools are separate processes and never inject modules into the title.
 
-On Linux/macOS, use `python3 -m venv .venv`, `.venv/bin/python -m pip install -r requirements.txt`, then `.venv/bin/python create_asset_pack.py /path/to/your/game`.
+Detection and compatibility are separate: **only the resource fingerprints in `asset-importer/recipes.json` are supported**. An unsupported PC version is rejected before extraction or packaging-tool download. Selecting a launcher executable does not select a game installation; choose its installed game folder instead.
 
-Select the complete installation or its original `*_Data` directory. The importer reads only its fingerprinted plain asset files and explicit interface sound files. It never executes the PC game, reads decompiled scripts, accepts decryption keys, or reads/decrypts its protected song bundles. Unsupported versions fail before extraction. The source installation remains unchanged.
+The builder reads plain asset files and explicitly listed UI sound files. It never runs the PC game, reads decompiled scripts, accepts decryption keys, or reads/decrypts protected song bundles. The original installation is unchanged. An existing output is not overwritten; failed/cancelled builds are cleaned up rather than presented as completed installs.
 
-It creates `EncoreAssets-v1.encore-assets` outside the PC installation. The generated pack contains your original resources: keep it private and do not attach it to project issues or redistribute it with a game build.
+## Install on PS5
 
-## On PS5
+Use the resulting folder or container with your compatible PS5 homebrew setup. These are native homebrew/debug packages, not retail-signed applications.
 
-Copy that file to the root of an **exFAT** USB drive. Connect it and open the game. With a DualSense, press Cross to import; Circle cancels. The importer detects `/mnt/usb0` through `/mnt/usb7`. As an alternative, upload the pack to `/data/homebrew/EncoreAssets-v1.encore-assets` using your existing setup.
+**Your personal assets are already inside the output.** First launch shows a preparation progress display and automatically installs them into persistent storage. No separate asset file copy, FTP upload or console import selection is needed. Later launches use the prepared assets.
 
-The game validates the exact required file list and every SHA-256 digest, writes a separate generation, and activates it only after the import completes. Cancelling, unplugging or a damaged pack cannot replace an existing working pack. Asset data stays in `/data/homebrew/PPSA99200/userdata/pc-assets/`, separate from your songs, saves and executable.
+Assets are kept at `/data/homebrew/PPSA99200/userdata/pc-assets/`, outside executable/runtime updates. Songs, profiles and scores remain intact. If a future build requires a different asset catalog, rebuild with its matching desktop builder. The game never downloads original PC assets from GitHub or another service.
 
-Normal code updates preserve this directory. If a future version changes the required asset layout, setup asks for a matching new pack. It never obtains copyrighted PC assets from GitHub or another download service.
+**Keep generated personal installs private.** They contain your imported resources. Do not upload them to GitHub, share them as releases, or attach them to issue reports. Share the unmodified public builder ZIP instead.
+
+## Existing v1.5.0 installs
+
+An already imported asset pack remains usable through normal code updates; rebuilding is unnecessary. The standalone `create_asset_pack.py` tool and manual USB import remain available as an advanced fallback. It creates `EncoreAssets-v1.encore-assets`, which the existing setup screen can import from an exFAT USB root or `/data/homebrew/EncoreAssets-v1.encore-assets`.
 
 ## Songs
 
-No songs are imported from the PC game. Add only charts and audio you are authorized to use, through the existing browser or SONGS storage. The old protected bundled-song conversion tool is not included.
+No songs are imported from the PC game or included in personal installs. Add only charts/audio you are authorized to use through Encore Browser, `/data/homebrew/SONGS`, or an exFAT root-level `SONGS` folder. The protected bundled-song conversion tool is not included.
