@@ -36,6 +36,16 @@ def load_recipes(path):
     return recipes
 
 
+def prepare_output(output,game_data):
+    output=output.resolve()
+    try:output.relative_to(game_data.resolve().parent)
+    except ValueError:pass
+    else:raise ValueError('Choose an output outside the PC installation.')
+    if output.suffix.lower()!='.encore-assets':raise ValueError('The output filename must end in .encore-assets')
+    output.parent.mkdir(parents=True,exist_ok=True)
+    return output
+
+
 def export(game_data,output,recipe_path):
     try:
         import UnityPy
@@ -59,12 +69,7 @@ def export(game_data,output,recipe_path):
         obj=objects[record['file'],record['id']]
         if obj.type.name!=record['type']:raise ValueError('PC object type mismatch')
         return obj.read().image.convert('RGBA')
-    output=output.resolve();output.parent.mkdir(parents=True,exist_ok=True)
-    # Output is separate from the PC installation; never extract into its files.
-    try:output.relative_to(game_data.resolve().parent)
-    except ValueError:pass
-    else:raise ValueError('Choose an output outside the PC game data directory.')
-    if output.suffix.lower()!='.encore-assets':raise ValueError('The output filename must end in .encore-assets')
+    output=prepare_output(output,game_data)
     with tempfile.TemporaryDirectory(prefix='ch-assets-',dir=output.parent) as temporary:
         work=Path(temporary);files=[]
         for i,r in enumerate(recipes['assets']):
