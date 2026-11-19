@@ -101,7 +101,7 @@ public:
         for(unsigned i=0;i<frames;++i){
             const auto phase=(audioFrames_+i)%beatFrames;
             const double envelope=phase<toneFrames?(1.0-double(phase)/toneFrames)*std::min(1.0,double(phase)/24):0;
-            const int16_t sample=phase<toneFrames?int16_t(6000*gain*envelope*std::sin(6.283185307179586*1400*double(phase)/48000.0)):0;
+            const int16_t sample=phase<toneFrames?int16_t(9000*gain*envelope*std::sin(6.283185307179586*1400*double(phase)/48000.0)):0;
             stereo[i*2]=stereo[i*2+1]=sample;
         }
         audioFrames_+=frames;lastStamp_=stampUs;
