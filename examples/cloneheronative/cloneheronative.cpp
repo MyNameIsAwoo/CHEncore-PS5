@@ -10846,28 +10846,49 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             popupLayer(true);
             using State=rhythm::updates::UpdateState;
             const auto snapshot=applicationUpdater.snapshot();const auto state=snapshot.state;
-            constexpr float x=440,y=230,w=1040;
+            constexpr float w=800,x=(1920-w)*.5f,padding=28,header=64,gap=8;
             const auto white=IM_COL32(245,245,245,255),muted=IM_COL32(195,200,210,255);
             auto* face=settingsFont?settingsFont:ImGui::GetFont();
-            draw->AddRectFilled(p(x,y),p(x+w,y+76),IM_COL32(8,8,8,255));
-            draw->AddRectFilled(p(x,y+88),p(x+w,y+580),IM_COL32(22,22,22,153));
+            struct Line {const char* text;float size;ImU32 color;float height;};
+            std::array<Line,4> lines{};unsigned count=0;
+            const auto append=[&](const char* text,float size,ImU32 color){
+                const float height=face->CalcTextSizeA(size*scale,100000,(w-padding*2)*scale,text).y/scale;
+                lines[count++]={text,size,color,height};
+            };
+            append(snapshot.release.title.empty()?buildVersion:snapshot.release.title.c_str(),28,white);
+            append(snapshot.message.empty()?"Check for a new PS5 release.":snapshot.message.c_str(),26,white);
+            if(state==State::Available)append("Updates apply automatically to folder, PKG and exFAT installs.",24,muted);
+            if(state==State::Ready)append("Keep the console on while the game restarts.",24,muted);
+            if(state==State::Downloaded && !snapshot.path.empty())append(snapshot.path.c_str(),22,muted);
+            const bool busy=state==State::Downloading || state==State::Checking || state==State::Installing;
+            float contentHeight=0;for(unsigned i=0;i<count;++i)contentHeight+=lines[i].height+(i?14:0);
+            const float bodyHeight=padding*2+contentHeight+(busy?30:0)+(state==State::Installing?0:54);
+            const float y=(1080-header-gap-bodyHeight)*.5f;
+            draw->AddRectFilled(p(x,y),p(x+w,y+header),IM_COL32(8,8,8,255));
+            draw->AddRectFilled(p(x,y+header+gap),p(x+w,y+header+gap+bodyHeight),IM_COL32(22,22,22,153));
             const char* heading="APPLICATION UPDATE";
-            const float tw=face->CalcTextSizeA(34*scale,100000,0,heading).x/scale;
-            draw->AddText(face,34*scale,p(960-tw*.5f,y+18),white,heading);
-            draw->AddText(face,29*scale,p(x+36,y+113),white,snapshot.release.title.empty()?buildVersion:snapshot.release.title.c_str());
-            draw->AddText(face,28*scale,p(x+36,y+168),white,snapshot.message.empty()?"Check for a new PS5 release.":snapshot.message.c_str(),nullptr,(w-72)*scale);
-            if(state==State::Available)draw->AddText(face,27*scale,p(x+36,y+300),muted,"Updates apply automatically to folder, PKG and exFAT installs.");
-            if(state==State::Ready)draw->AddText(face,25*scale,p(x+36,y+315),muted,"Keep the console on while the game restarts.");
-            if(state==State::Downloaded)draw->AddText(face,23*scale,p(x+36,y+330),muted,snapshot.path.c_str(),nullptr,(w-72)*scale);
-            if(state==State::Downloading || state==State::Checking || state==State::Installing) {
-                const float amount=state==State::Checking?.15f:float(applicationUpdater.progress());
-                draw->AddRectFilled(p(x+36,y+360),p(x+w-36,y+371),IM_COL32(85,90,100,255));
-                draw->AddRectFilled(p(x+36,y+360),p(x+36+(w-72)*std::clamp(amount,0.0f,1.0f),y+371),white);
+            const float tw=face->CalcTextSizeA(32*scale,100000,0,heading).x/scale;
+            draw->AddText(face,32*scale,p(960-tw*.5f,y+16),white,heading);
+            float cursor=y+header+gap+padding;
+            for(unsigned i=0;i<count;++i){
+                const auto& line=lines[i];
+                draw->AddText(face,line.size*scale,p(x+padding,cursor),line.color,line.text,nullptr,(w-padding*2)*scale);
+                cursor+=line.height+14;
             }
-            const auto hint=[&](int color,float hx,const char* label){draw->AddImage(songSelectControlIds[color],p(hx,y+510),p(hx+34,y+544));draw->AddText(face,24*scale,p(hx+44,y+513),white,label);};
-            if(state!=State::Checking && state!=State::Downloading && state!=State::Installing)
-                hint(0,x+36,state==State::Available?"Update":state==State::Ready?"Restart and play":state==State::Downloaded?"Done":"Check now");
-            if(state!=State::Installing)hint(1,x+790,state==State::Checking || state==State::Downloading?"Cancel":state==State::Available?"Later":"Back");
+            if(busy) {
+                const float amount=state==State::Checking?.15f:float(applicationUpdater.progress());
+                draw->AddRectFilled(p(x+padding,cursor+4),p(x+w-padding,cursor+14),IM_COL32(85,90,100,255));
+                draw->AddRectFilled(p(x+padding,cursor+4),p(x+padding+(w-padding*2)*std::clamp(amount,0.0f,1.0f),cursor+14),white);
+                cursor+=30;
+            }
+            const float buttonsY=y+header+gap+bodyHeight-padding-34;
+            const auto hint=[&](int color,float hx,const char* label){draw->AddImage(songSelectControlIds[color],p(hx,buttonsY),p(hx+34,buttonsY+34));draw->AddText(face,24*scale,p(hx+44,buttonsY+3),white,label);};
+            if(!busy)hint(0,x+padding,state==State::Available?"Update":state==State::Ready?"Restart and play":state==State::Downloaded?"Done":"Check now");
+            if(state!=State::Installing){
+                const char* label=busy?"Cancel":state==State::Available?"Later":"Back";
+                const float width=face->CalcTextSizeA(24*scale,100000,0,label).x/scale;
+                hint(1,x+w-padding-44-width,label);
+            }
         }
         if(screen==Screen::SongRemove) {
             popupLayer(true);
