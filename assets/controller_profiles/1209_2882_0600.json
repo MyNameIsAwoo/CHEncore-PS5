@@ -1,0 +1,177 @@
+{
+  "schema": 2,
+  "device": {
+    "vid": "0x1209",
+    "pid": "0x2882",
+    "name": "Santroller / RCM drums_pro",
+    "source": "raw_hid"
+  },
+  "instrument": "drums_pro",
+  "report": {
+    "length": 11,
+    "id": 1
+  },
+  "menu": {
+    "hat": 3
+  },
+  "bindings": [
+    {
+      "action": "kick",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x40",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 1,
+          "mask": "0x80"
+        }
+      ]
+    },
+    {
+      "action": "pad_green",
+      "type": "analog",
+      "byte": 4,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 4,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_red",
+      "type": "analog",
+      "byte": 5,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 5,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_yellow",
+      "type": "analog",
+      "byte": 6,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 6,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_blue",
+      "type": "analog",
+      "byte": 7,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 7,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_green",
+      "type": "analog",
+      "byte": 8,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 8,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_yellow",
+      "type": "analog",
+      "byte": 9,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 9,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_blue",
+      "type": "analog",
+      "byte": 10,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 10,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 2,
+      "mask": "0x2"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 2,
+      "mask": "0x1"
+    }
+  ]
+}

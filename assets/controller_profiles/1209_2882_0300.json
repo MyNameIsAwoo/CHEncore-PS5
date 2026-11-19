@@ -1,0 +1,73 @@
+{
+  "schema": 2,
+  "device": {
+    "vid": "0x1209",
+    "pid": "0x2882",
+    "name": "Santroller / RCM guitar_5fret",
+    "source": "raw_hid"
+  },
+  "instrument": "guitar_5fret",
+  "report": {
+    "length": 7,
+    "id": 1
+  },
+  "menu": {
+    "hat": 3
+  },
+  "bindings": [
+    {
+      "action": "green",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1"
+    },
+    {
+      "action": "red",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2"
+    },
+    {
+      "action": "yellow",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x4"
+    },
+    {
+      "action": "blue",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x8"
+    },
+    {
+      "action": "orange",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x10"
+    },
+    {
+      "action": "strum_up",
+      "type": "hat",
+      "byte": 3,
+      "value": 0
+    },
+    {
+      "action": "strum_down",
+      "type": "hat",
+      "byte": 3,
+      "value": 4
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x80"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x40"
+    }
+  ]
+}

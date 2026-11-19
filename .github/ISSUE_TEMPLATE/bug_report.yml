@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a problem with a CH: Encore alpha build.
+title: "[Bug] "
+body:
+  - type: input
+    id: build
+    attributes:
+      label: Build
+      placeholder: Alpha v.39
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Installation format
+      options:
+        - Game folder
+        - exFAT image
+        - PKG
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Console and launcher
+      description: PS5 model, firmware, and launcher or mounter version.
+    validations:
+      required: true
+  - type: input
+    id: controller
+    attributes:
+      label: Controller and instrument
+      description: Model, wired or wireless, PS4/PS5/XInput mode, selected instrument, and whether GameBridge is running. Include VID/PID if known.
+    validations:
+      required: true
+  - type: dropdown
+    id: storage
+    attributes:
+      label: Song storage
+      options:
+        - Internal storage
+        - External exFAT drive
+        - Bundled songs
+        - Not related to songs
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the number of players and relevant settings. For timing or display issues, include output resolution, FPS mode, song speed, and calibration offsets.
+      placeholder: |
+        1. Open ...
+        2. Select ...
+        3. Press ...
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs and screenshots
+      description: Attach userdata/logs/encore-test.log and rotated .1/.2 logs when available. Review attachments for personal information. Do not attach songs, firmware, credentials, or keys.

@@ -1,0 +1,4 @@
+https://github.com/richgel999/miniz
+commit 2c50092b3a4010760df02e7842960abdc3f25ee3
+Only the independent tinfl inflater is compiled.
+Local change: miniz_tinfl.c includes miniz_tinfl.h directly for standalone use.

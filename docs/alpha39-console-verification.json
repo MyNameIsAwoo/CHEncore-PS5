@@ -1,0 +1,42 @@
+{
+  "version": "Alpha v.39",
+  "source_revision": "0caec1d47a35f99d19a002194c8aab3895087fb8",
+  "eboot_sha256": "3f4ddd6ed78f262abd90967c9627ec3f0de3c1568403a80687995a89a4c838d0",
+  "scope": "Native render and synthetic bot checks; physical six-fret hardware unavailable",
+  "consoles": {
+    "base": {
+      "installation": "external USB folder",
+      "tests": {
+        "main-menu": {
+          "status": "pass",
+          "fps": 59.9
+        },
+        "six-fret-bot": {
+          "status": "pass",
+          "fps": 59.9
+        },
+        "mixed-four-player": {
+          "status": "pass",
+          "fps": 59.9
+        }
+      }
+    },
+    "pro": {
+      "installation": "internal game folder",
+      "tests": {
+        "main-menu": {
+          "status": "pass",
+          "fps": 59.9
+        },
+        "six-fret-bot": {
+          "status": "pass",
+          "fps": 59.9
+        },
+        "mixed-four-player": {
+          "status": "pass",
+          "fps": 59.9
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "schema": 3,
+  "device": {
+    "vid": "0x1bad",
+    "pid": "0x0005",
+    "name": "Harmonix Rock Band Wii drums",
+    "source": "raw_hid"
+  },
+  "instrument": "drums_4lane",
+  "report": {
+    "length": 27
+  },
+  "menu": {
+    "hat": 2,
+    "buttons": [
+      {
+        "action": "green",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x2"
+      },
+      {
+        "action": "red",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x4"
+      },
+      {
+        "action": "yellow",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x8"
+      },
+      {
+        "action": "blue",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x1"
+      },
+      {
+        "action": "start",
+        "type": "digital",
+        "byte": 1,
+        "mask": "0x2"
+      },
+      {
+        "action": "select",
+        "type": "digital",
+        "byte": 1,
+        "mask": "0x1"
+      }
+    ],
+    "hat_ignore_when": {
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x08"
+    }
+  },
+  "bindings": [
+    {
+      "action": "kick",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x10",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 0,
+          "mask": "0x20"
+        }
+      ]
+    },
+    {
+      "action": "pad_red",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x4",
+      "velocity": {
+        "type": "analog",
+        "byte": 12,
+        "bytes": 1,
+        "rest": 255,
+        "min": 0,
+        "max": 255,
+        "invert": true
+      }
+    },
+    {
+      "action": "pad_yellow",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x8",
+      "velocity": {
+        "type": "analog",
+        "byte": 11,
+        "bytes": 1,
+        "rest": 255,
+        "min": 0,
+        "max": 255,
+        "invert": true
+      }
+    },
+    {
+      "action": "pad_blue",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x1",
+      "velocity": {
+        "type": "analog",
+        "byte": 14,
+        "bytes": 1,
+        "rest": 255,
+        "min": 0,
+        "max": 255,
+        "invert": true
+      }
+    },
+    {
+      "action": "pad_green",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x2",
+      "velocity": {
+        "type": "analog",
+        "byte": 13,
+        "bytes": 1,
+        "rest": 255,
+        "min": 0,
+        "max": 255,
+        "invert": true
+      }
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1"
+    }
+  ]
+}

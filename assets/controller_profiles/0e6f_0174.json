@@ -1,0 +1,216 @@
+{
+  "schema": 3,
+  "device": {
+    "vid": "0x0e6f",
+    "pid": "0x0174",
+    "name": "PDP Rock Band 4 drums",
+    "source": "raw_hid"
+  },
+  "instrument": "drums_pro",
+  "report": {
+    "length": 64,
+    "id": 1
+  },
+  "menu": {
+    "hat": 5,
+    "hat_mask": "0x0f",
+    "buttons": [
+      {
+        "action": "green",
+        "type": "digital",
+        "byte": 5,
+        "mask": "0x20"
+      },
+      {
+        "action": "red",
+        "type": "digital",
+        "byte": 5,
+        "mask": "0x40"
+      },
+      {
+        "action": "yellow",
+        "type": "digital",
+        "byte": 5,
+        "mask": "0x80"
+      },
+      {
+        "action": "blue",
+        "type": "digital",
+        "byte": 5,
+        "mask": "0x10"
+      },
+      {
+        "action": "start",
+        "type": "digital",
+        "byte": 6,
+        "mask": "0x20"
+      },
+      {
+        "action": "select",
+        "type": "digital",
+        "byte": 6,
+        "mask": "0x10"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "action": "kick",
+      "type": "digital",
+      "byte": 6,
+      "mask": "0x1",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 6,
+          "mask": "0x2"
+        }
+      ]
+    },
+    {
+      "action": "pad_red",
+      "type": "analog",
+      "byte": 43,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 43,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_yellow",
+      "type": "analog",
+      "byte": 45,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 45,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_blue",
+      "type": "analog",
+      "byte": 44,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 44,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_green",
+      "type": "analog",
+      "byte": 46,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 46,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_yellow",
+      "type": "analog",
+      "byte": 47,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 47,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_blue",
+      "type": "analog",
+      "byte": 48,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 48,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "cymbal_green",
+      "type": "analog",
+      "byte": 49,
+      "bytes": 1,
+      "rest": 0,
+      "min": 0,
+      "max": 1,
+      "invert": false,
+      "velocity": {
+        "type": "analog",
+        "byte": 49,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 6,
+      "mask": "0x20"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 6,
+      "mask": "0x10"
+    }
+  ]
+}

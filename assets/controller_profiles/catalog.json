@@ -1,0 +1,190 @@
+{
+  "source": "https://github.com/TheNathannator/PlasticBand",
+  "revision": "a7b5ca304969717a6486fa21f1a42fb044d1150f",
+  "profiles": [
+    {
+      "file": "0e6f_024a.json",
+      "name": "PDP Riffmaster (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "0738_8261.json",
+      "name": "Mad Catz Rock Band 4 Stratocaster (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "0e6f_0173.json",
+      "name": "PDP Rock Band 4 Jaguar (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "3651_1500.json",
+      "name": "CRKD Gibson SG wired (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "3651_5500.json",
+      "name": "CRKD Gibson SG wireless (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "3958_5500.json",
+      "name": "CRKD Gibson SG wireless (PS4 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS4.md"
+    },
+    {
+      "file": "0e6f_0249.json",
+      "name": "PDP Riffmaster (PS5 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS5.md"
+    },
+    {
+      "file": "3651_1600.json",
+      "name": "CRKD Gibson SG wired (PS5 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS5.md"
+    },
+    {
+      "file": "3651_5600.json",
+      "name": "CRKD Gibson SG wireless (PS5 mode)",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS5.md"
+    },
+    {
+      "file": "1430_474c.json",
+      "name": "Guitar Hero World Tour PC receiver",
+      "reference": "Instruments/5-Fret Guitar/Guitar Hero/PS3.md"
+    },
+    {
+      "file": "12ba_0200.json",
+      "name": "Harmonix Rock Band PS3 guitar",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS3 and Wii.md"
+    },
+    {
+      "file": "1bad_0004.json",
+      "name": "Harmonix Rock Band Wii guitar",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS3 and Wii.md"
+    },
+    {
+      "file": "1bad_3010.json",
+      "name": "Harmonix Rock Band 2/3 Wii guitar",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/PS3 and Wii.md"
+    },
+    {
+      "file": "12ba_0210.json",
+      "name": "Harmonix Rock Band PS3 drums",
+      "reference": "Instruments/4-Lane Drums/PS3 and Wii.md"
+    },
+    {
+      "file": "1bad_0005.json",
+      "name": "Harmonix Rock Band Wii drums",
+      "reference": "Instruments/4-Lane Drums/PS3 and Wii.md"
+    },
+    {
+      "file": "1bad_3110.json",
+      "name": "Harmonix Rock Band 2/3 Wii drums",
+      "reference": "Instruments/4-Lane Drums/PS3 and Wii.md"
+    },
+    {
+      "file": "12ba_0120.json",
+      "name": "Guitar Hero World Tour / Band Hero PS3 drums",
+      "reference": "Instruments/5-Lane Drums/PS3.md"
+    },
+    {
+      "file": "0738_8262.json",
+      "name": "Mad Catz Rock Band 4 drums",
+      "reference": "Instruments/4-Lane Drums/PS4.md"
+    },
+    {
+      "file": "0e6f_0174.json",
+      "name": "PDP Rock Band 4 drums",
+      "reference": "Instruments/4-Lane Drums/PS4.md"
+    },
+    {
+      "file": "1209_2882_0300.json",
+      "name": "Santroller / RCM guitar_5fret",
+      "revision": "0x0300",
+      "reference": "Instruments/5-Fret Guitar/Guitar Hero/Santroller.md"
+    },
+    {
+      "file": "1209_2882_0400.json",
+      "name": "Santroller / RCM guitar_5fret",
+      "revision": "0x0400",
+      "reference": "Instruments/5-Fret Guitar/Rock Band/Santroller.md"
+    },
+    {
+      "file": "1209_2882_0500.json",
+      "name": "Santroller / RCM drums_5lane",
+      "revision": "0x0500",
+      "reference": "Instruments/5-Lane Drums/Santroller.md"
+    },
+    {
+      "file": "1209_2882_0600.json",
+      "name": "Santroller / RCM drums_pro",
+      "revision": "0x0600",
+      "reference": "Instruments/4-Lane Drums/Santroller.md"
+    },
+    {
+      "file": "1430_07bb.json",
+      "name": "Guitar Hero Live six-fret USB dongle",
+      "reference": "Instruments/6-Fret Guitar/PS4.md"
+    },
+    {
+      "file": "12ba_074b.json",
+      "name": "Guitar Hero Live six-fret USB dongle",
+      "reference": "Instruments/6-Fret Guitar/PS3 and Wii U.md"
+    },
+    {
+      "file": "12ba_0100.json",
+      "name": "PS3 Guitar Hero / RetroCultMods Wii guitar in PS3 GH mode",
+      "reference": "Instruments/5-Fret Guitar/Guitar Hero/PS3.md",
+      "adapter_reference": "https://wiki.retrocultmods.com/adapters/v3-adapter/"
+    }
+  ],
+  "hardware_validation": "Mappings derive from documented report layouts; only attached hardware can be physically certified.",
+  "limitations": [
+    "Xbox GIP/XInput, Bluetooth and instrument adapters needing vendor handshakes require separate backends.",
+    "Older Rock Band kits are mapped as four-lane; their multiplexed pro cymbal protocol is not inferred.",
+    "Whammy and tilt remain omitted.",
+    "Santroller HID variants require documented bcdDevice 0300/0400/0500/0600; console-emulation modes use their emulated device IDs. Other firmware layouts require remapping."
+  ],
+  "layout_source": {
+    "url": "https://github.com/TheNathannator/PlasticBand-Unity",
+    "revision": "14a30ec79c2d41a617ff146985a1c9a082ed9ba1",
+    "licence": "MIT",
+    "notice": "PlasticBand-Unity-LICENSE.txt"
+  },
+  "retrocult_reference": "https://retrocultmods.com/programming-tool/",
+  "transports": [
+    {
+      "protocol": "Xbox 360 wired",
+      "ids": [
+        "1430:4748",
+        "1bad:0002",
+        "1bad:0003",
+        "1bad:0130"
+      ],
+      "implementation": "gameplay/xbox360.hpp and ps5_usb_input.cpp",
+      "physical_validation": false
+    },
+    {
+      "protocol": "Xbox 360 wireless receiver",
+      "ids": [
+        "045e:0719",
+        "045e:0291",
+        "045e:02a9"
+      ],
+      "channels": 4,
+      "physical_validation": false
+    },
+    {
+      "protocol": "PS4 RB4 Stratocaster through native ScePad special port on PS5",
+      "ids": [
+        "0738:8261"
+      ],
+      "implementation": "ps5/src/platform.c",
+      "physical_validation": false
+    }
+  ],
+  "physical_validation": {
+    "0e6f:0249": "PS5 64-byte streaming verified; owner confirmed Options/frets/strum menu navigation",
+    "0e6f:024a": "Documented layout and host fixtures; no physical button validation yet"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema": 2,
+  "device": {
+    "vid": "0x12ba",
+    "pid": "0x0200",
+    "name": "Harmonix Rock Band PS3 guitar",
+    "source": "raw_hid"
+  },
+  "instrument": "guitar_5fret",
+  "report": {
+    "length": 27
+  },
+  "menu": {
+    "hat": 2
+  },
+  "bindings": [
+    {
+      "action": "green",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x2"
+    },
+    {
+      "action": "red",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x4"
+    },
+    {
+      "action": "yellow",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x8"
+    },
+    {
+      "action": "blue",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x1"
+    },
+    {
+      "action": "orange",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x10"
+    },
+    {
+      "action": "strum_up",
+      "type": "hat",
+      "byte": 2,
+      "value": 0
+    },
+    {
+      "action": "strum_down",
+      "type": "hat",
+      "byte": 2,
+      "value": 4
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+https://github.com/nothings/stb
+commit 9600522de53973336fa033a289858a4354cbb04c
+https://github.com/mackron/dr_libs
+commit c2d31fed078120f67263fd36237c0dcaae6bc07b

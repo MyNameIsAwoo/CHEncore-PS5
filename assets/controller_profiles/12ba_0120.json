@@ -1,0 +1,164 @@
+{
+  "schema": 3,
+  "device": {
+    "vid": "0x12ba",
+    "pid": "0x0120",
+    "name": "Guitar Hero World Tour / Band Hero PS3 drums",
+    "source": "raw_hid"
+  },
+  "instrument": "drums_5lane",
+  "report": {
+    "length": 27
+  },
+  "menu": {
+    "hat": 2,
+    "buttons": [
+      {
+        "action": "green",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x2"
+      },
+      {
+        "action": "red",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x4"
+      },
+      {
+        "action": "yellow",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x8"
+      },
+      {
+        "action": "blue",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x1"
+      },
+      {
+        "action": "orange",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x20"
+      },
+      {
+        "action": "start",
+        "type": "digital",
+        "byte": 1,
+        "mask": "0x2"
+      },
+      {
+        "action": "select",
+        "type": "digital",
+        "byte": 1,
+        "mask": "0x1"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "action": "kick",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x10",
+      "velocity": {
+        "type": "analog",
+        "byte": 15,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_green",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x2",
+      "velocity": {
+        "type": "analog",
+        "byte": 13,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_red",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x4",
+      "velocity": {
+        "type": "analog",
+        "byte": 12,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_yellow",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x8",
+      "velocity": {
+        "type": "analog",
+        "byte": 11,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_blue",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x1",
+      "velocity": {
+        "type": "analog",
+        "byte": 14,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_orange",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x20",
+      "velocity": {
+        "type": "analog",
+        "byte": 16,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 127,
+        "invert": false
+      }
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1"
+    }
+  ]
+}

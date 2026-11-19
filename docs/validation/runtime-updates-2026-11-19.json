@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-19",
+  "platform": "PS5 Pro",
+  "firmware": "11.00",
+  "launcher": "ShadowMount+ 1.7beta11",
+  "source_base": "ba9870e",
+  "scope": "Shared-runtime loader, owned metadata module and explicit update-chain QA hooks; private marker string distinguishes replacement engine.",
+  "engine_module_sha256": "3c54478e879affe4713f26f2b4f0a23750f30918be5c3771de1b84499fa14053",
+  "bootstrap_sha256": "c1ae7434821eb12ab274b97e1a3adbaff9e383f59feff059c5d0f9871d364069",
+  "checks": {
+    "worker_stage_activate_restart": "pass",
+    "folder_replacement_render": "pass",
+    "fresh_folder_launch_selects_runtime": "pass",
+    "read_only_exfat_replacement_render": "pass",
+    "previous_runtime_recovery": "pass",
+    "embedded_fallback_recovery": "pass",
+    "bounded_render_frames": 240,
+    "native_pkg_install": "pass",
+    "native_pkg_launch": "pass",
+    "sanitizers": "ASan/UBSan update, storage, release and corruption tests pass",
+    "native_pkg_automatic_update_and_restart": "pass",
+    "read_only_exfat_automatic_update_and_restart": "pass",
+    "complete_pkg_embedded_game": "pass",
+    "fresh_native_pkg_runtime_selection": "pass"
+  },
+  "release_state_at_validation": "unpublished",
+  "package_writer": "PS5 UltraPack 2.6.1 Linux",
+  "package_writer_sha256": "d6f7ed59effcb23ce37ae96205c7b8ed502858b412828ad76c5cc45780211988"
+}

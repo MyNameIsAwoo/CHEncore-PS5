@@ -1,0 +1,32 @@
+build/
+dist/
+klog/
+.deps/
+imgui.ini
+output/
+userdata/
+.env
+.env.*
+!.env.example
+*.log
+*.log.[12]
+/screenshots/
+**/__pycache__/
+*.pyc
+
+# User-supplied resources and importer output must never be committed.
+*.encore-assets
+*.encore-assets.tmp
+assets/pc_*/
+assets/Sprite/
+assets/Texture2D/
+assets/Font/
+assets/AudioClip/
+pc-assets/
+ps5/assets/launcher/
+ps5/sce_sys/icon0.png
+ps5/sce_sys/pic0.dds
+ps5/sce_sys/pic1.dds
+
+# Earlier gallery captures are not part of the asset-free source release.
+docs/images/

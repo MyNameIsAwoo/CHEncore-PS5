@@ -1,0 +1,9 @@
+name: Source resource audit
+on: [push, pull_request]
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 ps5/tools/check-no-pc-assets.py
+      - run: python3 -m py_compile tools/asset-importer/create_asset_pack.py

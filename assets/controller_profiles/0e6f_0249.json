@@ -1,0 +1,113 @@
+{
+  "schema": 2,
+  "device": {
+    "vid": "0x0e6f",
+    "pid": "0x0249",
+    "name": "PDP Riffmaster (PS5 mode)",
+    "source": "raw_hid"
+  },
+  "instrument": "guitar_5fret",
+  "report": {
+    "length": 64,
+    "id": 1
+  },
+  "menu": {
+    "hat": 8,
+    "hat_mask": "0x0f",
+    "x": 1,
+    "y": 2
+  },
+  "bindings": [
+    {
+      "action": "green",
+      "type": "digital",
+      "byte": 43,
+      "mask": "0x1",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 44,
+          "mask": "0x1"
+        }
+      ]
+    },
+    {
+      "action": "red",
+      "type": "digital",
+      "byte": 43,
+      "mask": "0x2",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 44,
+          "mask": "0x2"
+        }
+      ]
+    },
+    {
+      "action": "yellow",
+      "type": "digital",
+      "byte": 43,
+      "mask": "0x4",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 44,
+          "mask": "0x4"
+        }
+      ]
+    },
+    {
+      "action": "blue",
+      "type": "digital",
+      "byte": 43,
+      "mask": "0x8",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 44,
+          "mask": "0x8"
+        }
+      ]
+    },
+    {
+      "action": "orange",
+      "type": "digital",
+      "byte": 43,
+      "mask": "0x10",
+      "alternatives": [
+        {
+          "type": "digital",
+          "byte": 44,
+          "mask": "0x10"
+        }
+      ]
+    },
+    {
+      "action": "strum_up",
+      "type": "hat",
+      "byte": 8,
+      "value": 0,
+      "mask": "0xf"
+    },
+    {
+      "action": "strum_down",
+      "type": "hat",
+      "byte": 8,
+      "value": 4,
+      "mask": "0xf"
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 9,
+      "mask": "0x20"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 9,
+      "mask": "0x10"
+    }
+  ]
+}

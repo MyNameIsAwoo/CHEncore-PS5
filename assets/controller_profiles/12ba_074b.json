@@ -1,0 +1,117 @@
+{
+  "schema": 3,
+  "device": {
+    "vid": "0x12ba",
+    "pid": "0x074b",
+    "name": "Guitar Hero Live (PS3/Wii U USB dongle)",
+    "source": "raw_hid"
+  },
+  "instrument": "guitar_6fret",
+  "report": {
+    "length": 27
+  },
+  "menu": {
+    "hat": 2,
+    "hat_mask": "0x0f",
+    "buttons": [
+      {
+        "action": "blue",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x1"
+      },
+      {
+        "action": "orange",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x10"
+      },
+      {
+        "action": "green",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x2"
+      },
+      {
+        "action": "red",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x4"
+      },
+      {
+        "action": "yellow",
+        "type": "digital",
+        "byte": 0,
+        "mask": "0x8"
+      },
+      {
+        "action": "select",
+        "type": "digital",
+        "byte": 1,
+        "mask": "0x4"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "action": "w1",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x1"
+    },
+    {
+      "action": "w2",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x10"
+    },
+    {
+      "action": "w3",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x20"
+    },
+    {
+      "action": "b1",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x2"
+    },
+    {
+      "action": "b2",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x4"
+    },
+    {
+      "action": "b3",
+      "type": "digital",
+      "byte": 0,
+      "mask": "0x8"
+    },
+    {
+      "action": "strum_up",
+      "type": "hat",
+      "byte": 4,
+      "value": 0
+    },
+    {
+      "action": "strum_down",
+      "type": "hat",
+      "byte": 4,
+      "value": 255
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1"
+    }
+  ]
+}

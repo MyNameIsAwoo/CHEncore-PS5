@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "device": {
+    "vid": "0x054c",
+    "pid": "0x0ce6",
+    "name": "DualSense",
+    "source": "native"
+  },
+  "instrument": "guitar_5fret",
+  "bindings": [
+    {
+      "action": "green",
+      "type": "digital",
+      "pad_button": "cross"
+    },
+    {
+      "action": "red",
+      "type": "digital",
+      "pad_button": "circle"
+    },
+    {
+      "action": "yellow",
+      "type": "digital",
+      "pad_button": "square"
+    },
+    {
+      "action": "blue",
+      "type": "digital",
+      "pad_button": "triangle"
+    },
+    {
+      "action": "orange",
+      "type": "digital",
+      "pad_button": "l1"
+    },
+    {
+      "action": "strum_up",
+      "type": "digital",
+      "pad_button": "up"
+    },
+    {
+      "action": "strum_down",
+      "type": "digital",
+      "pad_button": "down"
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "pad_button": "options"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "pad_button": "touchpad"
+    }
+  ],
+  "provenance": "Identity: Microsoft GameInput DualSense companion README. Native PS5 scePad transport; fret choices are project defaults, not raw HID assumptions.",
+  "identity_source": "https://github.com/microsoftconnect/GameInput/blob/main/companion/DualSense/README.md"
+}

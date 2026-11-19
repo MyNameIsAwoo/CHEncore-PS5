@@ -1,0 +1,17 @@
+{
+  "setup": "pass",
+  "two_kicks": "pass",
+  "seven_pad_velocity_ranges": "pass",
+  "save_reload": "pass",
+  "midi_gameplay_hits": 6,
+  "misses": 0,
+  "companion_face_buttons_did_not_hit": "pass",
+  "physical_kit": "unavailable",
+  "date": "2026-11-19",
+  "platform": "PS5 Pro firmware 11.00",
+  "native_scope": "Explicit bounded USB-MIDI-packet injection, not physical kit validation",
+  "host_scope": "ASan/UBSan decoder, mapping, calibration, profile persistence; 128 alternating kicks at 30/60/120 FPS and four isolated sessions",
+  "source": "integration working tree; final release identity is recorded in TESTING.json",
+  "five_lane_one_kick": "pass",
+  "physical_usb_discovery_no_midi_kit": "pass"
+}

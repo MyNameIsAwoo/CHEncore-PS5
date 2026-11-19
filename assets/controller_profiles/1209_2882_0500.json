@@ -1,0 +1,121 @@
+{
+  "schema": 2,
+  "device": {
+    "vid": "0x1209",
+    "pid": "0x2882",
+    "name": "Santroller / RCM drums_5lane",
+    "source": "raw_hid"
+  },
+  "instrument": "drums_5lane",
+  "report": {
+    "length": 10,
+    "id": 1
+  },
+  "menu": {
+    "hat": 3
+  },
+  "bindings": [
+    {
+      "action": "pad_green",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x1",
+      "velocity": {
+        "type": "analog",
+        "byte": 4,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_red",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x2",
+      "velocity": {
+        "type": "analog",
+        "byte": 5,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_yellow",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x4",
+      "velocity": {
+        "type": "analog",
+        "byte": 6,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_blue",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x8",
+      "velocity": {
+        "type": "analog",
+        "byte": 7,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "pad_orange",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x10",
+      "velocity": {
+        "type": "analog",
+        "byte": 8,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "kick",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x20",
+      "velocity": {
+        "type": "analog",
+        "byte": 9,
+        "bytes": 1,
+        "rest": 0,
+        "min": 0,
+        "max": 255,
+        "invert": false
+      }
+    },
+    {
+      "action": "start",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x80"
+    },
+    {
+      "action": "star_power",
+      "type": "digital",
+      "byte": 1,
+      "mask": "0x40"
+    }
+  ]
+}

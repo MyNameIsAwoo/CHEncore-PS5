@@ -1,0 +1,105 @@
+{
+  "comment": "Assets CH: Encore ships. Original PC resources are supplied separately by each user.",
+  "sources": {
+    "download": "files fetched at pinned SHA-256 hashes",
+    "generated": "ps5/tools/generate_assets.py output",
+    "file": "a file kept in this repository"
+  },
+  "presentation": [
+    {
+      "paths": [
+        "sce_sys/pic0.dds",
+        "sce_sys/pic1.dds"
+      ],
+      "source": "ps5/assets/ch-branding",
+      "title": "CH: Encore typographic branding",
+      "author": "HOWL",
+      "licence": "MIT; rendered with Apache-2.0 Roboto",
+      "changes": "Original text layout using the licensed Roboto font. No PC artwork."
+    },
+    {
+      "paths": [
+        "sce_sys/icon0.png"
+      ],
+      "source": "ps5/assets/ch-branding",
+      "title": "CH: Encore typographic branding",
+      "author": "HOWL",
+      "licence": "MIT; rendered with Apache-2.0 Roboto",
+      "changes": "Original text layout using the licensed Roboto font. No PC artwork."
+    }
+  ],
+  "assets": [
+    {
+      "path": "Roboto-Medium.ttf",
+      "from": "download",
+      "used_by": [
+        "*"
+      ],
+      "title": "Roboto Medium",
+      "author": "Christian Robertson (Google Fonts)",
+      "licence": "Apache-2.0",
+      "url": "https://fonts.google.com/specimen/Roboto",
+      "licence_file": "licenses/Apache-2.0.txt",
+      "files": {
+        "": [
+          "https://raw.githubusercontent.com/SaschaWillems/Vulkan-Assets/a27c0e584434d59b7c7a714e9180eefca6f0ec4b/Roboto-Medium.ttf",
+          "8559132c89ad51d8a2ba5b171887a44a7ba93776e205f553573de228e64b45f8"
+        ]
+      }
+    },
+    {
+      "path": "certs/ca-bundle.crt",
+      "from": "file",
+      "source": "assets/certs/ca-bundle.crt",
+      "used_by": [
+        "cloneheronative"
+      ],
+      "title": "CA certificate bundle",
+      "author": "Mozilla CA Certificate Program",
+      "licence": "MPL-2.0",
+      "url": "https://curl.se/ca/cacert.pem",
+      "licence_file": "licenses/MPL-2.0.txt",
+      "changes": "Bundled certificate snapshot for HTTPS verification, dated 2026-08-23."
+    },
+    {
+      "path": "branding/menu-logo.png",
+      "from": "file",
+      "source": "ps5/assets/ch-branding/menu-logo.png",
+      "used_by": [
+        "cloneheronative"
+      ],
+      "title": "CH: Encore typography",
+      "author": "HOWL",
+      "licence": "MIT; rendered with Apache-2.0 Roboto",
+      "url": "",
+      "changes": "CH and ENCORE text using the licensed Roboto font. No PC artwork."
+    },
+    {
+      "path": "controller_profiles",
+      "from": "file",
+      "source": "assets/controller_profiles",
+      "used_by": [
+        "cloneheronative"
+      ],
+      "title": "Portable controller profiles",
+      "author": "HOWL project contributors",
+      "licence": "MIT",
+      "url": "local:assets/controller_profiles",
+      "changes": "Verified controller report facts and portable JSON configuration; no artwork.",
+      "licence_file": "../LICENSE.md"
+    },
+    {
+      "path": "cloneheronative/sounds/menu_intro.wav",
+      "from": "file",
+      "source": "assets/menu_intro/menu.wav",
+      "used_by": [
+        "cloneheronative"
+      ],
+      "title": "Encore main menu opening cue",
+      "author": "Project owner supplied",
+      "licence": "Proprietary; supplied and approved by the project owner for inclusion in CH: Encore builds (2026-11-18). No standalone asset licence is granted.",
+      "url": "",
+      "changes": "Original 48 kHz stereo WAV; plays once on opening the main menu before song previews."
+    }
+  ]
+}
