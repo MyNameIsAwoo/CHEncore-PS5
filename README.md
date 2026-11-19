@@ -8,13 +8,28 @@ A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 
 **v1.5.1 — Personal install builder** moves asset setup onto your PC. The public download contains an asset-free game template and a desktop builder. Your own authorized PC resources are added locally to a folder install, exFAT image or native homebrew PKG. No original PC resources or songs are supplied by this project.
 
-## Getting started
+## Install on PS5
 
-1. Download and extract the **desktop-builder ZIP** from [Releases](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases).
-2. Run **Start-Builder.cmd** on Windows (Python 3.10+), or **Start-Builder.sh** on Linux/macOS.
-3. Select a detected PC installation or Browse to yours, choose an output folder and install format, then select **Build install**. Only the fingerprinted resource version supported by the importer is accepted.
-4. Install your generated folder/image/package with your compatible PS5 homebrew setup. Its included personal assets are prepared automatically at first launch—no separate console asset transfer is needed.
-5. Add your own authorized charts through Encore Browser, `/data/homebrew/SONGS`, or an exFAT root-level `SONGS` folder. Nested collections are supported.
+**[Download the v1.5.1 Desktop Builder](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/download/v1.5.1/CH_Encore_1.5.1_desktop-builder.zip)** · [Release notes](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/tag/v1.5.1) · [Detailed setup guide](docs/ASSET_SETUP.md)
+
+You build your personal install on your PC, then install the resulting folder or container on your PS5. **You do not need to copy a separate asset pack to the console or use FTP for asset setup.**
+
+1. Install **[Python 3.10 or newer](https://www.python.org/downloads/)** if you do not have it. Windows includes Tk with the standard Python installer; Linux/macOS also need Tk and venv support.
+2. Download the desktop-builder ZIP above and **extract the entire archive** outside your PC game installation.
+3. On Windows, double-click **Start-Builder.cmd**. On Linux/macOS, run **Start-Builder.sh**. The launcher installs its pinned dependencies; the first run needs an internet connection.
+4. Select a detected PC game installation, or choose **Browse** for a custom location. Select the installed game folder or its `*_Data` folder, rather than the launcher executable. Only the resource version supported by the importer is accepted.
+5. Choose an output folder and one of the formats below, confirm permission to use your local resources, then select **Build install**. Packaging tools are downloaded and verified automatically when needed.
+6. Open the completed output folder and install its **PPSA99200 folder**, **.exfat image**, or **.pkg** using your compatible PS5 homebrew setup. Keep the complete title folder intact. **First launch prepares your included personal assets automatically**, with a progress display.
+
+| Builder choice | Output | Desktop support |
+| --- | --- | --- |
+| Game folder | Complete `PPSA99200` title folder | Windows / Linux / macOS |
+| exFAT image | `.exfat` image for a compatible image mounter | Windows / Linux / macOS |
+| Native homebrew PKG / fPKG | `.pkg` for a compatible native PS5 package setup | Windows / Linux x64 |
+
+These are homebrew/debug packages, not retail-signed applications. Desktop builds were checked on Windows and Linux; macOS and the new first-launch path still need physical-platform testing.
+
+**Songs are separate.** No songs are included or imported from the PC installation. Add authorized charts through Encore Browser, `/data/homebrew/SONGS`, or a root-level `SONGS` folder on an exFAT drive. Nested collections are supported.
 
 Read [Asset setup](docs/ASSET_SETUP.md) for requirements and supported platforms. Generated personal installs contain your imported resources and must stay private. Only the unmodified public builder is shareable. No permission to extract/reuse the original resources or developer approval is claimed; see [rights and distribution](docs/RIGHTS_AND_DISTRIBUTION.md).
 
@@ -34,7 +49,7 @@ I wish I could supply a fully built game, but have been asked not to include any
 
 ## Updating
 
-Existing installations keep their imported resources through the normal in-game runtime update. Older clients can first receive the v1.5.0 migration from the retired repository address; future checks then use this repository. For a fresh install, use the desktop builder. Original PC assets are never downloaded by the updater.
+**Already installed and your assets are working? Use the normal in-game update; you do not need to rebuild.** Existing installations keep their imported resources through the runtime update. Older clients can first receive the v1.5.0 migration from the retired repository address; future checks then use this repository. For a fresh install, use the desktop builder above. The `_update.encore` download is for the in-game updater, not a standalone installer. Original PC assets are never downloaded by the updater.
 
 The game-folder, exFAT and native homebrew/debug PKG formats are supported by compatible homebrew setups. These packages are not retail-signed. Preserve the complete title folder and your userdata when manually installing.
 
