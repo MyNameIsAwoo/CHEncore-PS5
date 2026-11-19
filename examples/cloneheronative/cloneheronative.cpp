@@ -10846,14 +10846,13 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             popupLayer(true);
             using State=rhythm::updates::UpdateState;
             const auto snapshot=applicationUpdater.snapshot();const auto state=snapshot.state;
-            constexpr float w=800,x=(1920-w)*.5f,padding=28,header=64,gap=8;
+            constexpr float padding=28,header=64,gap=8,maxWidth=800;
             const auto white=IM_COL32(245,245,245,255),muted=IM_COL32(195,200,210,255);
             auto* face=settingsFont?settingsFont:ImGui::GetFont();
             struct Line {const char* text;float size;ImU32 color;float height;};
             std::array<Line,4> lines{};unsigned count=0;
             const auto append=[&](const char* text,float size,ImU32 color){
-                const float height=face->CalcTextSizeA(size*scale,100000,(w-padding*2)*scale,text).y/scale;
-                lines[count++]={text,size,color,height};
+                lines[count++]={text,size,color,0};
             };
             append(snapshot.release.title.empty()?buildVersion:snapshot.release.title.c_str(),28,white);
             append(snapshot.message.empty()?"Check for a new PS5 release.":snapshot.message.c_str(),26,white);
@@ -10861,13 +10860,25 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             if(state==State::Ready)append("Keep the console on while the game restarts.",24,muted);
             if(state==State::Downloaded && !snapshot.path.empty())append(snapshot.path.c_str(),22,muted);
             const bool busy=state==State::Downloading || state==State::Checking || state==State::Installing;
-            float contentHeight=0;for(unsigned i=0;i<count;++i)contentHeight+=lines[i].height+(i?14:0);
+            const char* heading="APPLICATION UPDATE";
+            const char* primary=busy?nullptr:state==State::Available?"Update":state==State::Ready?"Restart and play":state==State::Downloaded?"Done":"Check now";
+            const char* secondary=state==State::Installing?nullptr:busy?"Cancel":state==State::Available?"Later":"Back";
+            const auto textWidth=[&](const char* text,float size){return face->CalcTextSizeA(size*scale,100000,0,text).x/scale;};
+            const float tw=textWidth(heading,32);
+            float preferredWidth=tw;
+            for(unsigned i=0;i<count;++i)preferredWidth=std::max(preferredWidth,textWidth(lines[i].text,lines[i].size));
+            const float controlsWidth=(primary?44+textWidth(primary,24):0)+(secondary?44+textWidth(secondary,24):0)+(primary&&secondary?64:0);
+            const float w=std::min(maxWidth,std::max(preferredWidth,controlsWidth)+padding*2),x=(1920-w)*.5f;
+            float contentHeight=0;
+            for(unsigned i=0;i<count;++i){
+                auto& line=lines[i];
+                line.height=face->CalcTextSizeA(line.size*scale,100000,(w-padding*2)*scale,line.text).y/scale;
+                contentHeight+=line.height+(i?14:0);
+            }
             const float bodyHeight=padding*2+contentHeight+(busy?30:0)+(state==State::Installing?0:54);
             constexpr float y=64; // Keep update text above the main-menu logo.
             draw->AddRectFilled(p(x,y),p(x+w,y+header),IM_COL32(8,8,8,255));
             draw->AddRectFilled(p(x,y+header+gap),p(x+w,y+header+gap+bodyHeight),IM_COL32(22,22,22,153));
-            const char* heading="APPLICATION UPDATE";
-            const float tw=face->CalcTextSizeA(32*scale,100000,0,heading).x/scale;
             draw->AddText(face,32*scale,p(960-tw*.5f,y+16),white,heading);
             float cursor=y+header+gap+padding;
             for(unsigned i=0;i<count;++i){
@@ -10883,12 +10894,8 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             }
             const float buttonsY=y+header+gap+bodyHeight-padding-34;
             const auto hint=[&](int color,float hx,const char* label){draw->AddImage(songSelectControlIds[color],p(hx,buttonsY),p(hx+34,buttonsY+34));draw->AddText(face,24*scale,p(hx+44,buttonsY+3),white,label);};
-            if(!busy)hint(0,x+padding,state==State::Available?"Update":state==State::Ready?"Restart and play":state==State::Downloaded?"Done":"Check now");
-            if(state!=State::Installing){
-                const char* label=busy?"Cancel":state==State::Available?"Later":"Back";
-                const float width=face->CalcTextSizeA(24*scale,100000,0,label).x/scale;
-                hint(1,x+w-padding-44-width,label);
-            }
+            if(primary)hint(0,x+padding,primary);
+            if(secondary)hint(1,x+w-padding-44-textWidth(secondary,24),secondary);
         }
         if(screen==Screen::SongRemove) {
             popupLayer(true);
