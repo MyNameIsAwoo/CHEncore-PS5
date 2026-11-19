@@ -6,7 +6,7 @@ Huge thanks to my cousin, [Eddie Rubio](https://music.youtube.com/channel/UCmQMU
 
 A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 
-**v1.5.0 — pursuaded** changes to user-supplied PC resources. No original PC artwork, fonts, sound effects or songs are included in the game, source tree or release packages. The old main-menu screenshots have been removed.
+**v1.5.0 — Changes to user-supplied PC resources. No original PC artwork, fonts, sound effects or songs are included in the game, source tree or release packages. The old main-menu screenshots have been removed.
 
 ## Getting started
 
