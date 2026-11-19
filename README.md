@@ -20,6 +20,8 @@ Read [Asset setup](docs/ASSET_SETUP.md) for requirements and supported platforms
 
 Already imported assets, songs, profiles and scores remain in persistent storage, outside code/runtime updates. Existing installations can continue using normal in-game updates without rebuilding.
 
+I wish I could supply a fully built game, but have been asked not to include any assets in the project. Good news, after initial install updates are automatic in-game!
+
 ## Features
 
 - Five-fret guitar/bass, six-fret, drums, Pro Drums and five-lane layouts.
