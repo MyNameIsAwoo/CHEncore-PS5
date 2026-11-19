@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include "player_calibration.hpp"
 
 namespace rhythm {
 class StreamedSong;
@@ -61,6 +62,7 @@ private:
 // previews/cues retain bounded decoded clips. All stems share one playback cursor.
 class AudioStemMixer {
 public:
+    CalibrationTone calibrationTone;
     static constexpr size_t StemCount = 14;
     // These names mirror the extracted PC audio assets. Gameplay events select
     // the matching PC cue; BadNote variants are rotated for misses.

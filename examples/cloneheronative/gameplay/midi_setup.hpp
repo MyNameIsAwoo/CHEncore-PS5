@@ -33,6 +33,18 @@ public:
         order_=setupOrder(draft.mapping.layout(),draft.twoKickPads,true);index_=0;
         page=Page::Soft;readyAfterUs_=nowUs;message="Strike this pad softly.";return true;
     }
+    // Recalibrate an existing player's kit without changing note assignments,
+    // kick count or another player's/device-default profile.
+    void beginVelocity(const Profile& profile,uint64_t nowUs){
+        draft=profile;page=Page::OfferVelocity;chooseVelocity(true,nowUs);
+        const auto original=order_;order_={};
+        for(unsigned i=0;i<original.count;++i) {
+            const auto action=original.actions[i];
+            if(std::any_of(draft.mapping.bindings().begin(),draft.mapping.bindings().end(),
+                [&](const auto& binding){return binding.action==action;}))order_.actions[order_.count++]=action;
+        }
+        if(!order_.count){page=Page::Review;message="No mapped pads or cymbals to calibrate.";}
+    }
     bool skipVelocity(uint64_t nowUs){
         if(page!=Page::Soft && page!=Page::Hard)return false;
         advanceVelocity(nowUs);return true;

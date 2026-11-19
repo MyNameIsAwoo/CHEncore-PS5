@@ -4,6 +4,7 @@
 #include "feature_availability.hpp"
 #include "highway_styles.hpp"
 #include "player_colors.hpp"
+#include "player_calibration.hpp"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -39,6 +40,7 @@ struct MenuProfile {
     bool highwayEffects{false};
     std::array<controls::Mapping,5> mappings{controls::defaults(0),controls::defaults(1),controls::defaults(2),controls::defaults(3),controls::defaults(4)};
     std::vector<controls::ControllerProfile> rawMappings;
+    std::array<float,5> inputOffsetsMs{};
     const controls::ControllerProfile* rawMapping(int type,uint16_t vid,uint16_t pid) const {
         for(const auto& p:rawMappings)if(p.vid==vid && p.pid==pid && p.instrument==controls::instrumentName(type))return &p;
         return nullptr;
@@ -55,7 +57,7 @@ bool savePlayerProfiles(const char*,const std::vector<MenuProfile>&);
 
 class ProfileMenu {
 public:
-    enum class Page { Closed, Profiles, Options, Name, Delete, Colors };
+    enum class Page { Closed, Profiles, Options, Name, Delete, Colors, Calibration };
     struct Slot {
         Page page{Page::Closed};
         int profile{-2}; // -2: unassigned, -1: transient guest, otherwise saved index
@@ -63,6 +65,7 @@ public:
         MenuProfile guest{"Guest"};
         std::string name, message;
         bool rename{false},remapRequested{false};
+        bool timingRequested{},velocityRequested{},midiAvailable{};
         float slide{0.0f};
         float slideElapsed{0.0f};
         bool expanding{false};
@@ -179,19 +182,25 @@ public:
             r.push_back("Guest"); r.push_back("Create Profile"); return r;
         }
         if(s.page==Page::Delete) return {"Cancel", "Delete Profile"};
+        if(s.page==Page::Calibration) {
+            std::vector<std::string> r{"Timing Test","Input Offset","Reset Timing"};
+            if(s.midiAvailable)r.push_back("MIDI Velocity");
+            r.push_back("Back");return r;
+        }
         if(s.page==Page::Colors) {
             std::vector<std::string> colors{"Hit Effect Color","Star Power Color","Highway Effects"};
             if(const auto* p=profile(player);p && p->controller<2){colors.push_back("Note Color");colors.push_back("Tap Note Color");}
             if(const auto* p=profile(player);p && p->controller>=2)colors.push_back("Kick Color");
             return colors;
         }
-        std::vector<std::string> r={"Controller","Remap Controller","Note Speed","Highway Length","Lefty Flip",
+        std::vector<std::string> r={"Controller","Remap Controller","Calibrate Controller","Note Speed","Highway Length","Lefty Flip",
             "Gamepad Mode","Bot","Show Accuracy","Display Name","Color Options","Drop Out"};
         r.insert(r.end()-1,"Highway Style");
         if(s.profile>=0) { r.insert(r.begin(),"Delete Profile"); r.insert(r.begin(),"Rename Profile"); }
         return r;
     }
     bool enabled(const std::string& row) const {
+        if(row=="Calibrate Controller")return true;
         return row=="Highway Effects" || row=="Note Color" || row=="Color Options" || row=="Star Power Color" || row=="Highway Style" || row=="Tap Note Color" || row=="Hit Effect Color" || row=="Kick Color" || row=="Remap Controller" || row=="Controller" || row=="Note Speed" || row=="Highway Length" || row=="Lefty Flip" ||
             row=="Gamepad Mode" || row=="Bot" ||
             row=="Show Accuracy" || row=="Display Name" || row=="Rename Profile" ||
@@ -209,9 +218,10 @@ public:
     }
     void back(int player) {
         auto& s=slots[player]; s.message.clear();
-        if(s.page==Page::Colors) {
+        if(s.page==Page::Colors || s.page==Page::Calibration) {
+            const bool calibration=s.page==Page::Calibration;
             s.page=Page::Options;const auto options=rows(player);
-            s.row=int(std::find(options.begin(),options.end(),"Color Options")-options.begin());
+            s.row=int(std::find(options.begin(),options.end(),calibration?"Calibrate Controller":"Color Options")-options.begin());
         } else if(s.page==Page::Delete || (s.page==Page::Name && s.rename)) {
             s.page=Page::Options; s.row=0;
         } else if(s.page==Page::Name) { s.page=Page::Profiles; s.row=0; }
@@ -219,8 +229,14 @@ public:
     }
     void adjust(int player,int direction) {
         auto* p=profile(player); auto& s=slots[player];
-        if(!p || (s.page!=Page::Options && s.page!=Page::Colors)) return;
+        if(!p || (s.page!=Page::Options && s.page!=Page::Colors && s.page!=Page::Calibration)) return;
         const auto row=rows(player)[s.row];
+        if(s.page==Page::Calibration) {
+            if(row!="Input Offset")return;
+            auto& offset=p->inputOffsetsMs[std::clamp(p->controller,0,4)];
+            offset=std::clamp(offset+(direction<0?-1.0f:1.0f),-MaxPlayerOffsetMs,MaxPlayerOffsetMs);
+            dirty|=s.profile>=0;return;
+        }
         if(row=="Controller") {
             // Keep saved IDs stable; controller order is independent of stored IDs.
             static constexpr int controllerOrder[]{0,2,4,3,1};
@@ -278,9 +294,19 @@ public:
             back(player); return;
         }
         if(s.page==Page::Colors) {adjust(player,1);return;}
+        if(s.page==Page::Calibration) {
+            const auto row=rows(player)[s.row];
+            if(row=="Timing Test")s.timingRequested=true;
+            else if(row=="MIDI Velocity")s.velocityRequested=true;
+            else if(row=="Reset Timing") {if(auto* p=profile(player)){p->inputOffsetsMs[std::clamp(p->controller,0,4)]=0;dirty|=s.profile>=0;}}
+            else if(row=="Back")back(player);
+            else adjust(player,1);
+            return;
+        }
         if(s.page==Page::Options) {
             const auto row=rows(player)[s.row];
             if(row=="Color Options") {s.page=Page::Colors;s.row=0;return;}
+            if(row=="Calibrate Controller") {s.page=Page::Calibration;s.row=0;return;}
             if(row=="Remap Controller") s.remapRequested=true;
             else if(row=="Drop Out") { s.profile=-2; s.page=Page::Closed; s.row=0; }
             else if(row=="Rename Profile") {

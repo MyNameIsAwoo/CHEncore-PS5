@@ -17,6 +17,7 @@ const char* stbi_failure_reason(void);
 #include "downloader/song_package.hpp"
 #include "gameplay/pc_drums_visuals.hpp"
 #include "gameplay/profile_menu.hpp"
+#include "gameplay/player_calibration.hpp"
 #include "gameplay/controller_profile.hpp"
 #include "gameplay/controller_navigation.hpp"
 #include "gameplay/player_seats.hpp"
@@ -376,6 +377,14 @@ public:
         std::string message;
     };
     std::array<PlayerRemap,PAD_PLAYERS> playerRemaps;
+    struct PlayerCalibration {
+        enum class Phase {None,WaitingAudio,Timing,TimingReview,Velocity,VelocityReview};
+        Phase phase{Phase::None};rhythm::TimingCalibration timing;rhythm::midi::SetupWizard velocity;
+        int type{},profileId{-2},source{-1},row{};uint64_t generation{},audioEpoch{};
+        uint32_t previousButtons{},previousTap{};uint64_t lastAudioAt{};bool waitRelease{};std::string message;
+        bool active()const{return phase!=Phase::None;}
+    };
+    std::array<PlayerCalibration,PAD_PLAYERS> playerCalibrations;
     rhythm::controls::ControllerProfile activeControllerProfile;
     int unknownController{-1},unknownControllerChoice{};
     std::array<uint32_t,4> ignoredControllers{};
@@ -1728,6 +1737,7 @@ public:
             if(!midiSources[source].present)midiIgnored[source]=0;
             if(midiBatches[source].dropped)rhythm::logDiagnostic("MIDI overflow source=%u dropped=%u",source,midiBatches[source].dropped);
         }
+        for(int seat=0;seat<4;++seat)profileMenu.slots[seat].midiAvailable=midiSourceForSeat(seat)>=0 && profileMenu.profile(seat) && profileMenu.profile(seat)->controller>=2;
         for(int seat=0;seat<playerSeats.count;++seat){
             const int source=midiSourceForSeat(seat);
             auto& link=midiLinks[seat];auto* profile=profileMenu.profile(seat);
@@ -2193,6 +2203,129 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
         if(row==3 && remap.raw){const auto* u=playerUsb(player);return u && u->deviceProfile && u->deviceProfile->instrument==rhythm::controls::instrumentName(remap.wizard.type);}
         return true;
     }
+    bool timingCalibrationRunning() const {
+        for(const auto& c:playerCalibrations)if(c.phase==PlayerCalibration::Phase::WaitingAudio || c.phase==PlayerCalibration::Phase::Timing)return true;
+        return false;
+    }
+    void syncCalibrationAudio() {
+#if !defined(PS5_HOST_REFERENCE)
+        songAudio.calibrationTone.enable(timingCalibrationRunning(),masterVolume*.65f);
+#endif
+    }
+    bool calibrationReference(uint64_t stamp,double& time,uint64_t& epoch) const {
+#if !defined(PS5_HOST_REFERENCE)
+        return songAudio.calibrationTone.timeAt(stamp,time,epoch);
+#else
+        (void)stamp;(void)time;(void)epoch;return false;
+#endif
+    }
+    void closePlayerCalibration(int player,uint32_t held,const char* message="") {
+        playerCalibrations[player].phase=PlayerCalibration::Phase::None;
+        auto& slot=profileMenu.slots[player];slot.page=rhythm::ProfileMenu::Page::Calibration;slot.row=0;slot.message=message;
+        playerPreviousButtons[player]=menuButtons(player,held);playerMenuRepeat[player].reset();syncCalibrationAudio();
+    }
+    void beginPlayerCalibration(int player,bool velocity=false) {
+        auto* profile=profileMenu.profile(player);if(!profile)return;
+        auto& slot=profileMenu.slots[player];slot.message.clear();
+        const int source=profile->controller>=2?midiSourceForSeat(player):-1;
+        if(velocity && source<0){slot.message="Connect and map a MIDI kit first.";return;}
+#if !defined(PS5_HOST_REFERENCE)
+        if(!velocity && (!audioOutputStarted || masterVolume<=0)) {slot.message="Enable audio and raise Master Volume first.";return;}
+#else
+        if(!velocity){slot.message="Timing test needs console audio output.";return;}
+#endif
+        auto& c=playerCalibrations[player];c={};c.type=std::clamp(profile->controller,0,4);c.profileId=slot.profile;
+        c.source=source;c.generation=source>=0?midiSources[source].generation:0;
+        c.phase=velocity?PlayerCalibration::Phase::Velocity:PlayerCalibration::Phase::WaitingAudio;
+        c.waitRelease=true;c.lastAudioAt=uint64_t(now_seconds()*1000000);slot.page=rhythm::ProfileMenu::Page::Calibration;
+        if(velocity)c.velocity.beginVelocity(midiLinks[player].profile,uint64_t(now_seconds()*1000000));
+        syncCalibrationAudio();
+    }
+    void savePlayerCalibration(int player,uint32_t held) {
+        auto& c=playerCalibrations[player];auto* profile=profileMenu.profile(player);if(!profile)return;
+        auto& slot=profileMenu.slots[player];
+        if(c.phase==PlayerCalibration::Phase::TimingReview) {
+            if(!c.timing.valid){c.message="Timing varied too much. Retry the test.";return;}
+            const float previous=profile->inputOffsetsMs[c.type];const bool dirty=profileMenu.dirty;
+            const float suggested=float(std::round(c.timing.offsetMs+audioOffsetMs));
+            if(!std::isfinite(suggested) || std::abs(suggested)>rhythm::MaxPlayerOffsetMs){c.message="Offset out of range. Check Audio Offset in Settings.";return;}
+            profile->inputOffsetsMs[c.type]=suggested;
+            profileMenu.dirty|=slot.profile>=0;
+            if(!saveProfiles()){profile->inputOffsetsMs[c.type]=previous;profileMenu.dirty=dirty;c.message="Could not save. Previous timing is unchanged.";return;}
+        } else if(c.phase==PlayerCalibration::Phase::VelocityReview) {
+            if(midiSourceForSeat(player)!=c.source || midiSources[c.source].generation!=c.generation){c.message="The MIDI kit changed. Start again.";return;}
+            const auto key=midiPlayerKey(profile,slot.profile>=0);
+            if(!key.empty() && !rhythm::midi::saveProfile(midiProfilePath(c.source,key).c_str(),c.velocity.draft,c.message))return;
+            midiLinks[player].profile=c.velocity.draft;
+        } else return;
+        closePlayerCalibration(player,held,slot.profile>=0?"Calibration saved for this player.":"Guest calibration applied for this session.");
+    }
+    void updatePlayerCalibration(int player,const pad& input) {
+        auto& c=playerCalibrations[player];using Phase=PlayerCalibration::Phase;
+        const auto* profile=profileMenu.profile(player);auto& slot=profileMenu.slots[player];
+        if(!profile || slot.profile!=c.profileId || profile->controller!=c.type){closePlayerCalibration(player,input.held,"Profile changed; restart calibration.");return;}
+        if(c.source>=0 && (midiSourceForSeat(player)!=c.source || midiSources[c.source].generation!=c.generation)){
+            closePlayerCalibration(player,input.held,"MIDI kit disconnected. Previous settings kept.");return;
+        }
+        const auto held=menuButtons(player,input.held);
+        uint32_t edges=held&~c.previousButtons;c.previousButtons=held;
+        const auto menuEdges=filterMenuPresses(player,edges);
+        if(c.waitRelease){if(!held)c.waitRelease=false;return;}
+        if(menuEdges&(PAD_CIRCLE|PAD_OPTIONS)){closePlayerCalibration(player,input.held,"Calibration cancelled.");return;}
+        if(c.phase==Phase::TimingReview || c.phase==Phase::VelocityReview){
+            const unsigned controls=playerMenuRepeat[player].update(held&(PAD_UP|PAD_DOWN),menuEdges,float(frameTimer),2304+int(c.phase),true);
+            if((menuEdges|controls)&PAD_UP)c.row=(c.row+2)%3;
+            if((menuEdges|controls)&PAD_DOWN)c.row=(c.row+1)%3;
+            if(menuEdges&PAD_CROSS){
+                if(c.row==0)savePlayerCalibration(player,input.held);
+                else if(c.row==1)beginPlayerCalibration(player,c.phase==Phase::VelocityReview);
+                else closePlayerCalibration(player,input.held,"Calibration cancelled.");
+            }
+            return;
+        }
+        const auto nowUs=uint64_t(now_seconds()*1000000.0);
+        if(c.phase==Phase::Velocity){
+            if(menuEdges&PAD_SQUARE)c.velocity.skipVelocity(nowUs);
+            for(unsigned i=0;i<midiBatches[c.source].count;++i)c.velocity.sample(midiBatches[c.source].strikes[i]);
+            if(c.velocity.page==rhythm::midi::SetupWizard::Page::Review){c.phase=Phase::VelocityReview;c.row=0;}
+            return;
+        }
+        double now=0;uint64_t epoch=0;
+        if(!calibrationReference(nowUs,now,epoch)){
+            if(nowUs>c.lastAudioAt+2000000)closePlayerCalibration(player,input.held,"Audio unavailable. Previous calibration kept.");
+            return;
+        }
+        c.lastAudioAt=nowUs;
+        if(c.phase==Phase::WaitingAudio || c.audioEpoch!=epoch){
+            const bool restarted=c.audioEpoch!=0;
+            c.phase=Phase::Timing;c.audioEpoch=epoch;c.timing.begin(now);c.previousTap=0;
+            if(restarted)c.message="Audio restarted; timing test reset.";
+        }
+        const auto sample=[&](uint64_t stamp){double at=0;uint64_t generation=0;
+            if(calibrationReference(stamp,at,generation) && generation==c.audioEpoch)c.timing.sample(at);
+        };
+        if(c.source>=0){
+            for(unsigned i=0;i<midiBatches[c.source].count;++i)
+                midiLinks[player].profile.mapping.apply(midiBatches[c.source].strikes[i],[&](const auto& strike){sample(strike.receivedUs);});
+        }else{
+            const auto mapping=playerControllerProfile(player,c.type);
+            const auto tap=[&](const rhythm::controls::InstrumentState& state,uint64_t stamp){
+                const unsigned value=c.type>=2?unsigned(state.pads&1):unsigned(state.frets&1)|(state.strumUp?2u:0u)|(state.strumDown?4u:0u);
+                if(value&~c.previousTap)sample(stamp);c.previousTap=value;
+            };
+            const auto* usb=playerUsb(player);
+            if(usb && mapping.source==rhythm::controls::Source::RawHid){
+                const auto& batch=usbInputBatches[playerSeats.slotOfSeat[player]-4];
+                for(unsigned i=0;i<batch.count;++i){const auto& report=batch.reports[i];tap(rhythm::controls::applyProfile(mapping,{},report.bytes.data(),report.length),report.receivedUs);}
+            }else{
+                rhythm::controls::NativeSample native{input.held,{input.l2*255,input.r2*255,input.left_x*127+128,input.left_y*127+128,input.right_x*127+128,input.right_y*127+128}};
+                tap(rhythm::controls::applyProfile(mapping,native,nullptr,0),nowUs);
+            }
+        }
+        c.timing.update(now);
+        if(c.timing.state==rhythm::TimingCalibration::State::Review){c.phase=Phase::TimingReview;c.row=c.timing.valid?0:1;syncCalibrationAudio();}
+    }
+
     void updateControllerRemap(int player,uint32_t pressed,uint32_t buttons) {
         auto& remap=playerRemaps[player];
         using Page=rhythm::controls::Remap::Page;
@@ -2636,7 +2769,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
         };
         shift(profileMenu.slots);shift(playerJoined);shift(playerReady);shift(playerPage);shift(playerMenuRow);
         shift(playerInstrument);shift(playerDifficulty);shift(playerModifierMask);shift(playerPreviousButtons);
-        shift(selectionProfileId);shift(selectionController);shift(playerRemaps);shift(midiLinks);
+        shift(selectionProfileId);shift(selectionController);shift(playerRemaps);shift(playerCalibrations);shift(midiLinks);syncCalibrationAudio();
         shift(menuPressFilters);shift(menuSticks);shift(playerMenuRepeat);
         remapPlayer=std::clamp(remapPlayer>seat?remapPlayer-1:remapPlayer,0,PAD_PLAYERS-1);
         playerDifficulty[playerSeats.count-1]=3;
@@ -3900,7 +4033,13 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 if (!readPlayerInput(player,&playerInput)) {
                     playerPreviousButtons[player] = 0;playerMenuRepeat[player].reset();
                     // Preserve the assigned profile across a temporary unplug.
+                    if(playerCalibrations[player].active())closePlayerCalibration(player,0,"Controller disconnected. Previous settings kept.");
                     if(!playerRemaps[player].active)profileMenu.slots[player].page=rhythm::ProfileMenu::Page::Closed;
+                    continue;
+                }
+                if(playerCalibrations[player].active()) {
+                    if(player==0)profileInputConsumed=true;
+                    if(!keyboardBlockedFrame && !searchKeyboardOpen && !instrumentKeyboard.open)updatePlayerCalibration(player,playerInput);
                     continue;
                 }
                 auto& remap=playerRemaps[player];
@@ -3944,6 +4083,10 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                             if(playerPressed & (PAD_DOWN | PAD_L1)) profileMenu.move(player,1);
                             if(playerPressed & PAD_LEFT) profileMenu.adjust(player,-1);
                             if(playerPressed & PAD_RIGHT) profileMenu.adjust(player,1);
+                            if(slot.page==rhythm::ProfileMenu::Page::Calibration && profileMenu.rows(player)[slot.row]=="Input Offset"){
+                                if(playerPressed&PAD_SQUARE)profileMenu.adjust(player,-1);
+                                if(playerPressed&PAD_TRIANGLE)profileMenu.adjust(player,1);
+                            }
                             if(playerPressed & PAD_CROSS) profileMenu.accept(player);
                         }
                     }
@@ -3961,6 +4104,13 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             for(int player=0;player<PAD_PLAYERS;++player) if(profileMenu.slots[player].remapRequested) {
                 profileMenu.slots[player].remapRequested=false;
                 openControllerRemap(player);if(player==0)profileInputConsumed=true;
+            }
+            for(int player=0;player<PAD_PLAYERS;++player){
+                auto& slot=profileMenu.slots[player];
+                if(slot.timingRequested || slot.velocityRequested){
+                    const bool velocity=slot.velocityRequested;slot.timingRequested=slot.velocityRequested=false;
+                    beginPlayerCalibration(player,velocity);if(player==0)profileInputConsumed=true;
+                }
             }
             if(screen==Screen::PlayerSelect) tryStartSelectedSong();
         }
@@ -4331,8 +4481,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             menuIntroFinished=true;menuWidgetRevealAt=ImGui::GetTime();
             rhythm::logDiagnostic("menu intro finished; preview enabled");
         }
-        finishPreviewAudioDecode();
-        startGameplayAudioDecode();
+        if(!timingCalibrationRunning()){finishPreviewAudioDecode();startGameplayAudioDecode();}
         if(screen==Screen::Gameplay && songAudio.streamFailed() && !ui.visible){
             rhythm::logDiagnostic("ERROR gameplay audio source failed; pausing");
             playing=false;ui.visible=true;pausePage=PausePage::Main;pauseSelection=0;
@@ -4375,7 +4524,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
 #endif
         const double frameAdvance = gameplayDelta * (screen == Screen::Gameplay && playMode == PlayMode::Practice ? practiceRate : 1.0f);
 #if !defined(PS5_HOST_REFERENCE)
-        if(screen==Screen::MainMenu && menuIntroFinished) {
+        if(screen==Screen::MainMenu && menuIntroFinished && !timingCalibrationRunning()) {
             if(menuMusicSelection>=0 && menuMusicSelection<static_cast<int>(localSongs.size())) {
                 const LocalSong& current=localSongs[static_cast<size_t>(menuMusicSelection)];
                 const bool completed=menuPreviewAudioChartPath==current.chartPath && previewPlayingForMenu &&
@@ -4394,7 +4543,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             }
             if(menuMusicSelection>=0 && menuMusicSelection<static_cast<int>(localSongs.size()))
                 requestPreviewAudio(localSongs[static_cast<size_t>(menuMusicSelection)]);
-        } else if (screen == Screen::SongSelect && songSelection >= 0 &&
+        } else if (screen == Screen::SongSelect && !timingCalibrationRunning() && songSelection >= 0 &&
                    songSelection < static_cast<int>(localSongs.size())) {
             // Cursor settling plus worker decode keeps browsing responsive.
             if (previewQueuedSongSelection != songSelection) {
@@ -4504,6 +4653,13 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
     }
 
     void updateGameplaySeat(bool chartAdvancing,double gameplayDelta) {
+        // Each engine advances on its calibrated timeline, including automatic
+        // misses. Audio, highway rendering and the other seats keep shared time.
+        struct RestoreTime {double& time;double value;~RestoreTime(){time=value;}} restore{songTime,songTime};
+        if(!activeProfile.bot && gameplayReplay.empty() && !multiplayerQa)
+            songTime=rhythm::playerJudgementTime(songTime,activeProfile.inputOffsetsMs[std::clamp(activeProfile.controller,0,4)],
+                playMode==PlayMode::Practice?practiceRate:1.0);
+
         struct pad input{};const bool connected=readPlayerInput(gameplayPlayer,&input);
         const auto* usb=playerUsb(gameplayPlayer);
         const bool drumController=chart.kind==rhythm::ChartKind::Drums;
@@ -8289,6 +8445,9 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 const auto& remap=playerRemaps[player];
                 std::fprintf(log," active%d %d index%d %u stage%d %d review%d %d",player+1,remap.active?1:0,
                     player+1,remap.wizard.index,player+1,int(remap.wizard.page),player+1,remap.wizard.row);
+                const auto& calibration=playerCalibrations[player];double reference=0;uint64_t epoch=0;
+                const bool clock=calibrationReference(uint64_t(now_seconds()*1000000),reference,epoch);
+                std::fprintf(log," calibration%d %d samples%d %u clock%d %d",player+1,int(calibration.phase),player+1,calibration.timing.count,player+1,clock?1:0);
             }
             std::fprintf(log,"\n");
             std::fclose(log);
@@ -8501,7 +8660,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             static constexpr float playerCenters[PAD_PLAYERS] = {255,725,1195,1665};
             for (int i=0; i<PAD_PLAYERS; ++i) {
                 auto& slot=profileMenu.slots[i];
-                const bool expanded=profileMenu.open(i) || playerRemaps[i].active;
+                const bool expanded=profileMenu.open(i) || playerRemaps[i].active || playerCalibrations[i].active();
                 animateMenuPanel(expanded,slot.expanding,slot.slideElapsed,slot.slide);
                 const float x=playerCenters[i]-217.5f, y=978.0f-308.0f*slot.slide;
                 const auto* profile=profileMenu.profile(i);
@@ -8509,6 +8668,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 if (expanded && slot.page==rhythm::ProfileMenu::Page::Profiles) title="Select Profile";
                 if (slot.page==rhythm::ProfileMenu::Page::Name) title=slot.rename?"Rename Profile":"Create Profile";
                 if (slot.page==rhythm::ProfileMenu::Page::Colors) title="Color Options";
+                if(slot.page==rhythm::ProfileMenu::Page::Calibration)title="Calibrate Controller";
                 if (slot.page==rhythm::ProfileMenu::Page::Delete) title="Delete Profile?";
                 // Keep the profile card translucent in both collapsed and
                 // expanded states so opening it does not look like the menu
@@ -8526,10 +8686,71 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                     draw->AddText(ImGui::GetFont(),titleSize*scale,p(gx+52,y+(78-titleSize)*0.5f),titleInk,title);
                 } else draw->AddText(ImGui::GetFont(),titleSize*scale,p(x+std::max(12.0f,(435-titleWidth)*0.5f),y+(78-titleSize)*0.5f),titleInk,title);
                 draw->PopClipRect();
-                if (clickable(600+i*100,x,y,435,78)) {if(playerRemaps[i].active)closeControllerRemap(i,0);else profileMenu.start(i);}
+                if (clickable(600+i*100,x,y,435,78)) {if(playerCalibrations[i].active())closePlayerCalibration(i,0,"Calibration cancelled.");else if(playerRemaps[i].active)closeControllerRemap(i,0);else profileMenu.start(i);}
                 if (!expanded) continue;
                 draw->PushClipRect(p(x,y+78),p(x+435,1056),true);
-                if(playerRemaps[i].active) {
+                if(playerCalibrations[i].active()) {
+                    auto& c=playerCalibrations[i];using Phase=PlayerCalibration::Phase;
+                    const ImU32 white=IM_COL32(240,243,247,255),muted=IM_COL32(180,193,212,255);
+                    const auto label=[&](const char* value,float dy,float size,ImU32 ink){
+                        const auto* font=ImGui::GetFont();const float width=font->CalcTextSizeA(size,100000,0,value).x;
+                        draw->AddText(font,size*scale,p(x+std::max(12.0f,(435-width)*.5f),y+dy),ink,value);
+                    };
+                    const auto hint=[&](int color,const char* value,float center,float dy){
+                        const float width=ImGui::GetFont()->CalcTextSizeA(18,100000,0,value).x;
+                        const float hx=x+center-(25+9+width)*.5f;
+                        draw->AddImage(songSelectControlIds[color],p(hx,y+dy),p(hx+25,y+dy+25));
+                        draw->AddText(ImGui::GetFont(),18*scale,p(hx+34,y+dy+3),white,value);
+                    };
+                    label(rhythm::MenuProfile::controllerNames[c.type],88,21,muted);
+                    if(c.phase==Phase::TimingReview || c.phase==Phase::VelocityReview){
+                        if(c.phase==Phase::TimingReview){
+                            char value[100];
+                            if(c.timing.valid)std::snprintf(value,sizeof(value),"Suggested offset: %+.0f ms",c.timing.offsetMs+audioOffsetMs);
+                            else std::snprintf(value,sizeof(value),"Timing was inconsistent - retry");
+                            label(value,125,22,c.timing.valid?white:IM_COL32(255,195,130,255));
+                            std::snprintf(value,sizeof(value),"%u good hits  |  variation %.0f ms",c.timing.inliers,c.timing.spreadMs);
+                            label(value,157,18,muted);
+                        }else{label("Velocity calibration complete",125,22,white);label("Kick mappings are unchanged",157,18,muted);}
+                        const char* choices[]{profileMenu.slots[i].profile>=0?"Save Player":"Apply to Guest","Retry","Cancel"};
+                        for(int row=0;row<3;++row){
+                            const float ry=y+196+row*35;const bool selected=c.row==row;
+                            if(selected)draw->AddRectFilled(p(x+8,ry),p(x+427,ry+33),IM_COL32(208,212,214,255));
+                            const ImU32 ink=selected?IM_COL32(15,18,24,255):white;
+                            label(choices[row],ry-y+6,21,ink);
+                            if(clickable(9400+i*10+row,x+8,ry,419,33)){
+                                c.row=row;if(row==0)savePlayerCalibration(i,0);else if(row==1)beginPlayerCalibration(i,c.phase==Phase::VelocityReview);else closePlayerCalibration(i,0,"Calibration cancelled.");
+                            }
+                        }
+                        hint(0,"Select",119,312);hint(1,"Cancel",316,312);
+                    }else if(c.phase==Phase::Velocity){
+                        static constexpr const char* names[]{"Kick","Red Pad","Yellow Pad","Yellow Cymbal","Blue Pad","Blue Cymbal","Green Pad","Green Cymbal","Orange Cymbal"};
+                        const unsigned action=unsigned(c.velocity.action());
+                        const int color=action==1?1:action==2||action==3?2:action==4||action==5?3:action==8?4:0;
+                        label(c.velocity.page==rhythm::midi::SetupWizard::Page::Soft?"Strike softly":"Strike firmly",124,26,white);
+                        draw->AddImage(songSelectControlIds[color],p(x+195,y+163),p(x+239,y+207));
+                        label(names[std::min(action,8u)],216,25,white);
+                        label("Use the same pad shown above",254,18,muted);
+                        hint(2,"Skip pad",119,311);hint(1,"Cancel",316,311);
+                    }else{
+                        label(c.source>=0?"Tap a MIDI pad or kick to the clicks":c.type>=2?"Hit the kick to the clicks":"Strum or press Green to the clicks",124,21,white);
+                        double now=0;uint64_t epoch=0;
+                        const bool audio=calibrationReference(uint64_t(now_seconds()*1000000),now,epoch);
+                        char value[96];
+                        if(!audio || c.phase==Phase::WaitingAudio)std::snprintf(value,sizeof(value),"Starting audio...");
+                        else if(now<c.timing.firstBeat)std::snprintf(value,sizeof(value),"Get ready: %d",int(std::ceil((c.timing.firstBeat-now)/rhythm::CalibrationBeatSeconds)));
+                        else std::snprintf(value,sizeof(value),"%u / %u good hits",c.timing.count,rhythm::TimingCalibration::Samples);
+                        label(value,178,29,white);
+                        draw->AddRectFilled(p(x+35,y+229),p(x+400,y+242),IM_COL32(52,66,87,255));
+                        draw->AddRectFilled(p(x+35,y+229),p(x+35+365*float(c.timing.count)/rhythm::TimingCalibration::Samples,y+242),IM_COL32(105,206,160,255));
+                        const bool flash=audio && std::fmod(std::max(0.0,now),rhythm::CalibrationBeatSeconds)<.085;
+                        draw->AddRectFilled(p(x+198,y+268),p(x+237,y+283),flash?IM_COL32(230,245,255,255):IM_COL32(57,73,94,255));
+                        hint(1,"Cancel",217.5f,311);
+                    }
+                    const char* note=c.message.empty()?(profileMenu.slots[i].profile>=0?"Saved per player and instrument":"Guest changes last for this session"):c.message.c_str();
+                    label(note,351,16,muted);
+                } else if(playerRemaps[i].active) {
+
                     const auto& remap=playerRemaps[i];const auto& wizard=remap.wizard;
                     using Page=rhythm::controls::Remap::Page;
                     const ImU32 white=IM_COL32(240,243,247,255),muted=IM_COL32(184,194,210,255);
@@ -8612,7 +8833,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                         if (selected) draw->AddRectFilled(p(x+5,ry),p(x+430,ry+48),IM_COL32(225,231,239,255));
                         const ImU32 ink=enabled?(selected?IM_COL32(12,18,26,255):IM_COL32(240,243,247,255)):(selected?IM_COL32(100,105,114,255):IM_COL32(130,137,149,255));
                         draw->AddText(ImGui::GetFont(),21.0f*scale,p(x+18,ry+14),ink,rows[row].c_str());
-                        if (profile && (slot.page==rhythm::ProfileMenu::Page::Options || slot.page==rhythm::ProfileMenu::Page::Colors)) {
+                        if (profile && (slot.page==rhythm::ProfileMenu::Page::Options || slot.page==rhythm::ProfileMenu::Page::Colors || slot.page==rhythm::ProfileMenu::Page::Calibration)) {
                             char value[32]{};
                             if (rows[row]=="Controller") {
                                 const int controller=std::clamp(profile->controller,0,4);
@@ -8626,7 +8847,9 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                                 if (controllerIcon) draw->AddImage(controllerIcon,p(gx,ry+5),p(gx+40,ry+45),ImVec2(0,0),ImVec2(1,1),available?IM_COL32(255,255,255,255):IM_COL32(130,130,130,255));
                                 draw->AddText(ImGui::GetFont(),valueSize*scale,p(gx+48,ry+(50-valueSize)*.5f),available?ink:IM_COL32(115,120,130,255),value);
                             } else {
-                                if(rows[row]=="Highway Style") std::snprintf(value,sizeof(value),"%s",rhythm::highwayStyles[std::clamp(profile->highwayStyle,0,int(rhythm::highwayStyles.size())-1)].name);
+                                if(rows[row]=="Input Offset") std::snprintf(value,sizeof(value),"%+.0f ms",profile->inputOffsetsMs[std::clamp(profile->controller,0,4)]);
+                                else if(rows[row]=="Calibrate Controller") std::snprintf(value,sizeof(value),">");
+                                else if(rows[row]=="Highway Style") std::snprintf(value,sizeof(value),"%s",rhythm::highwayStyles[std::clamp(profile->highwayStyle,0,int(rhythm::highwayStyles.size())-1)].name);
                                 else if(rows[row]=="Highway Effects") std::snprintf(value,sizeof(value),"%s",profile->highwayEffects?"ON":"DEFAULT");
                                 else if(rows[row]=="Note Color") std::snprintf(value,sizeof(value),"%s",rhythm::noteColorNames[std::clamp(profile->noteColor,0,9)]);
                                 else if(rows[row]=="Star Power Color") std::snprintf(value,sizeof(value),"%s",rhythm::starPowerColorNames[std::clamp(profile->starPowerColor,0,5)]);
@@ -8647,6 +8870,13 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                         }
                         if (clickable(660+i*100+visible,x+5,ry,425,48)) { slot.row=row; profileMenu.accept(i); }
                     }
+                    if(slot.page==rhythm::ProfileMenu::Page::Calibration && rows[slot.row]=="Input Offset"){
+                        draw->AddImage(songSelectControlIds[2],p(x+55,y+342),p(x+80,y+367));
+                        draw->AddText(ImGui::GetFont(),18*scale,p(x+88,y+346),IM_COL32(235,240,247,255),"-1 ms");
+                        draw->AddImage(songSelectControlIds[3],p(x+250,y+342),p(x+275,y+367));
+                        draw->AddText(ImGui::GetFont(),18*scale,p(x+283,y+346),IM_COL32(235,240,247,255),"+1 ms");
+                    }
+
                 }
                 draw->PopClipRect();
                 if (!slot.message.empty()) draw->AddText(ImGui::GetFont(),17.0f*scale,p(x+10,y-25),IM_COL32(255,211,151,255),slot.message.c_str());
@@ -8792,9 +9022,12 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 static constexpr Change changes[]={
                     {"1.5.2 - Standalone Windows builder",
                      "One Windows executable creates your personal install.\n"
-                     "Python and packaging tools are included.\n"
+                     "Folder and exFAT tools are included.\n"
+                     "PKG tool downloads automatically on first use.\n"
                      "No separate desktop dependencies or ZIP extraction.\n"
-                     "Your authorized PC assets are added locally."},
+                     "Your authorized PC assets are added locally.\n"
+                     "Per-player, per-instrument timing calibration.\n"
+                     "MIDI pad velocity can be recalibrated without remapping."},
                     {"1.5.1 - Personal install builder",
                      "Build your install on PC using your own authorized assets.\n"
                      "Choose a game folder, exFAT image or native homebrew PKG.\n"
@@ -8964,6 +9197,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                     {"Copy songs both ways","Copy USB songs to the console or console songs to USB. Confirm the song count before copying; existing charts are skipped."},
                     {"Beta tester diagnostics","A small rotating background log records important loading, display and controller events in userdata/logs/encore-test.log."},
                     {"Direct USB instruments","Supported USB rhythm controllers connect directly in game without a separate GameBridge payload."},
+                    {"Player calibration","Timing tests and manual offsets are saved separately for each player and instrument. MIDI pad/cymbal velocity can be recalibrated without remapping kicks."},
                     {"Guided controller remapping","Set up an unfamiliar device from the player menu. Save mappings for that device or player and instrument; known mappings load automatically."},
                     {"Rhythm-controller menus","Browse with frets and strum controls, or a D-pad and stick. Settings use categories, select-to-edit lists and red to return."},
                     {"Controller-friendly text entry","Guitar controllers use the fret-and-strum keyboard. DualSense uses the native PS5 keyboard for search and profile names."},

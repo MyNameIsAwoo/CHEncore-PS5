@@ -38,6 +38,7 @@ I wish I could supply a fully built game, but have been asked not to include any
 - Encore Browser for chart search/downloads; USB/internal song scanning, copying and confirmed removal.
 - Local records, lyrics, solos, pause/restart, previews and highway/color options.
 - Display-aware resolution and supported 60/120 FPS modes.
+- [Per-player, per-instrument timing calibration](docs/CONTROLLER_CALIBRATION.md), plus MIDI pad/cymbal velocity recalibration without remapping kicks.
 - USB MIDI drums with **experimental/intermittent support**; keep a DualSense for menus and pause.
 - Verified updates with persistent user resources and startup recovery.
 

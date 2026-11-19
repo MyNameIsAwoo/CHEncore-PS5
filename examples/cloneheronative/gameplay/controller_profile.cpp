@@ -245,6 +245,15 @@ bool loadPlayerProfiles(const char* path,std::vector<MenuProfile>& out){
         if(!j.is_object()||!controls::text(j,"name",p.name)||p.name.empty()||p.name.size()>24||p.name.find_first_of("\r\n")!=std::string::npos||!controls::number(j,"speed",speed)||speed<.5f||speed>2||!controls::integer(j,"controller",0,4,controller)||!controls::integer(j,"highway_length",20,1000,length)||length%10)return false;
         for(const auto& other:players)if(other.name==p.name)return false;
         p.speed=speed;p.controller=controller;p.highwayLength=length;
+        if(const auto offsets=j.find("input_offsets_ms");offsets!=j.end()) {
+            if(!offsets->is_array() || offsets->size()!=p.inputOffsetsMs.size())return false;
+            for(size_t type=0;type<p.inputOffsetsMs.size();++type){
+                if(!(*offsets)[type].is_number())return false;
+                const auto value=(*offsets)[type].get<double>();
+                if(!std::isfinite(value) || std::abs(value)>MaxPlayerOffsetMs)return false;
+                p.inputOffsetsMs[type]=float(value);
+            }
+        }
         for(auto pair:{std::pair{"gamepad",&p.gamepad},{"lefty",&p.lefty},{"alternate_tap",&p.alternateTap},{"bot",&p.bot},{"show_accuracy",&p.showAccuracy},{"display_name",&p.displayName}}){
             auto i=j.find(pair.first);if(i==j.end()||!i->is_boolean())return false;*pair.second=i->get<bool>();
         }
@@ -286,8 +295,10 @@ bool savePlayerProfiles(const char* path,const std::vector<MenuProfile>& players
     controls::Json root={{"schema",1},{"players",controls::Json::array()}};
     if(players.size()>32)return false;
     for(const auto& p:players){
+        for(const auto offset:p.inputOffsetsMs)if(!std::isfinite(offset) || std::abs(offset)>MaxPlayerOffsetMs)return false;
         if(p.name.empty() || p.name.size()>24 || !controls::validUtf8(p.name) || p.name.find_first_of("\r\n")!=std::string::npos || !std::isfinite(p.speed) || p.speed<.5f || p.speed>2 || p.controller<0 || p.controller>4 || p.highwayLength<20 || p.highwayLength>1000 || p.highwayLength%10)return false;
         controls::Json j={{"name",p.name},{"speed",p.speed},{"controller",p.controller},{"highway_length",p.highwayLength},{"gamepad",p.gamepad},{"lefty",p.lefty},{"alternate_tap",p.alternateTap},{"bot",p.bot},{"show_accuracy",p.showAccuracy},{"display_name",p.displayName},{"purple_kick",p.purpleKick},{"kick_color_explicit",p.kickColorExplicit},{"lane_hit_effects",p.laneHitEffects},{"purple_tap_notes",p.purpleTapNotes},{"highway_style",p.highwayStyle},{"star_power_color",p.starPowerColor},{"note_color",p.noteColor},{"highway_effects",p.highwayEffects},{"controllers",controls::Json::array()}};
+        j["input_offsets_ms"]=p.inputOffsetsMs;
         for(int type=0;type<5;++type){if(!controls::valid(p.mappings[type],type))return false;
             auto item=controls::Json::parse(controls::writeProfile(controls::nativeProfile(type,p.mappings[type])),nullptr,false);
             if(item.is_discarded())return false;item["custom"]=p.mappings[type].custom;j["controllers"].push_back(std::move(item));

@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <cctype>
+#include <time.h>
 
 namespace rhythm {
 namespace {
@@ -870,6 +871,11 @@ void AudioStemMixer::audioFill(int16_t* output, int frames, void* user) noexcept
     auto* mixer = static_cast<AudioStemMixer*>(user);
     if (!mixer) {
         std::memset(output, 0, static_cast<size_t>(frames) * 2 * sizeof(int16_t));
+        return;
+    }
+    if(mixer->calibrationTone.active()) {
+        timespec now{};clock_gettime(CLOCK_MONOTONIC,&now);
+        mixer->calibrationTone.fill(output,unsigned(frames),uint64_t(now.tv_sec)*1000000+uint64_t(now.tv_nsec)/1000);
         return;
     }
     for (int offset = 0; offset < frames; offset += 256) {
