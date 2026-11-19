@@ -16,14 +16,15 @@ def gui():
     import tkinter as tk
     from tkinter import ttk, filedialog, messagebox
     root = tk.Tk(); root.title('CH: Encore — Install Builder')
-    root.geometry('860x720'); root.minsize(760, 650); root.configure(bg='#151b24')
+    root.geometry('860x760'); root.minsize(760, 740); root.configure(bg='#151b24')
     style = ttk.Style(); style.theme_use('clam')
     style.configure('.', background='#151b24', foreground='#ecf0f5', font=('Segoe UI', 11))
     style.configure('TEntry', fieldbackground='#242e3b', foreground='#ffffff', padding=7)
     style.configure('TCombobox', fieldbackground='#242e3b', background='#242e3b', foreground='#ffffff', padding=7)
     style.map('TCombobox', fieldbackground=[('readonly', '#242e3b')])
     style.configure('TButton', background='#2e4056', padding=(16, 9))
-    style.map('TButton', background=[('active', '#3b5470'), ('disabled', '#242a32')])
+    style.map('TButton', background=[('active', '#3b5470'), ('disabled', '#242a32')],
+              foreground=[('disabled', '#8591a0'), ('!disabled', '#ecf0f5')])
     style.configure('Title.TLabel', font=('Segoe UI', 25, 'bold'))
     style.configure('Sub.TLabel', foreground='#aebac9')
     style.configure('TRadiobutton', padding=(0, 7), background='#151b24')
@@ -55,7 +56,7 @@ def gui():
     acknowledge = tk.BooleanVar()
     consent = ttk.Checkbutton(pane, text='I have permission to extract and use these local PC resources.', variable=acknowledge)
     consent.pack(anchor='w', pady=(3, 9))
-    logbox = tk.Text(pane, height=7, bg='#0f141c', fg='#c9d6e4', font=('Consolas', 10),
+    logbox = tk.Text(pane, height=5, bg='#0f141c', fg='#c9d6e4', font=('Consolas', 10),
                      relief='flat', wrap='word', padx=12, pady=10, state='disabled')
     logbox.pack(fill='both', expand=True, pady=(0, 10))
     status = tk.StringVar(value='Ready')

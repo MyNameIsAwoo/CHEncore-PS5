@@ -32,7 +32,7 @@ Already imported assets, songs, profiles and scores remain in persistent storage
 
 ## Updating
 
-Current updater-enabled installs can receive a migration update from the retired repository address. It contains the same asset-free executable as this release. After the one-time asset import, future update checks use this repository. Original PC assets are never downloaded by the updater.
+Existing installations keep their imported resources through the normal in-game runtime update. Older clients can first receive the v1.5.0 migration from the retired repository address; future checks then use this repository. For a fresh install, use the desktop builder. Original PC assets are never downloaded by the updater.
 
 The game-folder, exFAT and native homebrew/debug PKG formats are supported by compatible homebrew setups. These packages are not retail-signed. Preserve the complete title folder and your userdata when manually installing.
 
@@ -44,7 +44,7 @@ This project is not affiliated with, approved by or endorsed by the original PC 
 
 ## Building and reports
 
-Native builds use the vendored prospero toolchain and the existing Vulkan 1.3/RADV renderer. See `ps5/README.md`, the corresponding-source archives, and `BUILDING.txt` in each release. The user asset pack is never a build input or release attachment.
+Native builds use the vendored prospero toolchain and the existing Vulkan 1.3/RADV renderer. See `ps5/README.md`, the corresponding-source archives, and `BUILDING.txt` in each release. Personal resources are never native code build inputs or public release attachments. The desktop builder adds them only to the user's private install output.
 
 Read [known issues](KNOWN_ISSUES.md) and [diagnostics](docs/beta-diagnostics.md) before reporting a problem. Include console/firmware, launcher/version, controller/mode and reproduction steps. Discord: **mynameisawooo**.
 

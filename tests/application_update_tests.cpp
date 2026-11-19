@@ -31,6 +31,10 @@ int main(){
  Json release={{"tag_name","alpha-v41"},{"draft",false},{"prerelease",false},{"body","Release notes"},{"assets",Json::array()}};
  for(const auto& suffix:{"_update.encore",".pkg",".exfat"}){std::string name="CH_Encore_Alpha_v41"+std::string(suffix);release["assets"].push_back({{"name",name},{"size",payload.size()},{"digest","sha256:"+hash(payload)},{"browser_download_url",base+name}});}
  response=release.dump();ReleaseInfo info;std::string error;assert(parseRelease(response,info,error) && info.version==41 && !info.assets[0].url.empty());
+ // Builder-first releases expose the universal runtime update, without ready-
+ // made PKG/exFAT files. Existing installations must still discover/install it.
+ auto builderOnly=release;builderOnly["assets"]=Json::array({release["assets"][0]});
+ assert(parseRelease(builderOnly.dump(),info,error) && !info.assets[0].url.empty() && info.assets[1].url.empty() && info.assets[2].url.empty());
  for(const auto& field:{"draft","prerelease"}){auto wrong=release;wrong[field]=true;assert(!parseRelease(wrong.dump(),info,error));}
  auto wrong=release;wrong["tag_name"]="v1.0-rc1";assert(!parseRelease(wrong.dump(),info,error));
  wrong=release;wrong["assets"][0]["browser_download_url"]="https://other.example/update";assert(parseRelease(wrong.dump(),info,error) && info.assets[0].url.empty());

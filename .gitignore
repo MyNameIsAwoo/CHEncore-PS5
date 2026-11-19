@@ -12,6 +12,7 @@ userdata/
 *.log.[12]
 /screenshots/
 **/__pycache__/
+.venv/
 *.pyc
 
 # User-supplied resources and importer output must never be committed.
