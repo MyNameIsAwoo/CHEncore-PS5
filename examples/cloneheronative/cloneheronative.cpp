@@ -10863,7 +10863,7 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
             const bool busy=state==State::Downloading || state==State::Checking || state==State::Installing;
             float contentHeight=0;for(unsigned i=0;i<count;++i)contentHeight+=lines[i].height+(i?14:0);
             const float bodyHeight=padding*2+contentHeight+(busy?30:0)+(state==State::Installing?0:54);
-            const float y=(1080-header-gap-bodyHeight)*.5f;
+            constexpr float y=64; // Keep update text above the main-menu logo.
             draw->AddRectFilled(p(x,y),p(x+w,y+header),IM_COL32(8,8,8,255));
             draw->AddRectFilled(p(x,y+header+gap),p(x+w,y+header+gap+bodyHeight),IM_COL32(22,22,22,153));
             const char* heading="APPLICATION UPDATE";
