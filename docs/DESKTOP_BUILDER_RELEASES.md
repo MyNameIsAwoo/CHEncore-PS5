@@ -1,6 +1,6 @@
 # Desktop builder releases
 
-Public downloads use the desktop-builder ZIP for new installations and the asset-free `_update.encore` payload for existing installations. Do not upload the personal folder, PKG or exFAT outputs produced by the desktop builder. They contain the user's imported resources.
+Public downloads use the single Windows desktop-builder EXE for new installations and the asset-free `_update.encore` payload for existing installations. Do not upload the personal folder, PKG or exFAT outputs produced by the desktop builder. They contain the user's imported resources.
 
 After committing all changes and building the native title with the vendored toolchain:
 
@@ -18,6 +18,12 @@ python3 ps5/tools/build-update-package.py dist/PPSA99200 dist/CH_Encore_VERSION_
 
 Attach the complete corresponding source/licence archives and checksums alongside the builder/update. The native title has the same component/source obligations inside the desktop template as a directly packaged release. Retain the exact built tag and download/read-back verification. Never modify published artifacts in place.
 
-The desktop builder downloads pinned PS5 UltraPack 2.6.1 releases/source from GitHub. Its MkPFS exFAT serializer/reader and standalone native package writer run as separate processes. The exact archive and executable hashes are in `tools/install-builder/backends.py`. The user's tool cache retains complete upstream archives/notices, and no third-party metadata or entitlement module is inserted into CH: Encore. Audit tool updates independently; do not silently substitute an arbitrary package writer.
+The optional Python source builder downloads pinned PS5 UltraPack 2.6.1 releases/source from GitHub. Its MkPFS exFAT serializer/reader and standalone native package writer run as separate processes. The exact archive and executable hashes are in `tools/install-builder/backends.py`. The user's tool cache retains complete upstream archives/notices, and no third-party metadata or entitlement module is inserted into CH: Encore. Audit tool updates independently; do not silently substitute an arbitrary package writer.
 
 Tests must distinguish native Windows desktop packaging, Linux desktop packaging, host Vulkan setup, and physical console runs. A container validation success is not proof of a fresh console launch. A generated pack can differ in PNG compression bytes across platforms; its pixels, asset recipe/catalog and own file checksums must validate on each platform.
+
+## Windows single-file executable
+
+Run `ps5/tools/build-windows-builder.py` with native Windows CPython 3.12 x64 and PyInstaller 6.16.0. Supply the audited intermediate builder folder, an unmodified self-contained win-x64 Packwright 1.3.0 publish from source commit `7039684af5c978ae69ee619d44e98102a61104a6`, and its complete source ZIP. The executable embeds the template, importer, dependency data/native extensions, Packwright runtime, complete corresponding source and licence notices. It must not request additional downloads.
+
+Test the frozen executable rather than only its Python sources: `--self-check --offline --log-file CHECK.log`, then actual folder/exFAT/PKG builds with Python removed from PATH and `--offline`. Verify the resulting containers and record fresh console test limits. Source scripts remain an optional fallback, not a requirement for Windows users.

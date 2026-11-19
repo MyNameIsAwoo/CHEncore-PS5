@@ -1,56 +1,42 @@
-CH: Encore — Personal Install Builder
+CH: Encore 1.5.2 — Standalone Windows Install Builder
 
-Create a complete PS5 install on your own PC. Public downloads contain only
-this builder and the asset-free game template. Your PC assets are added locally.
+Windows users: download CH_Encore_1.5.2_Install_Builder.exe and double-click it.
+It is one self-contained file: Python 3.12, importer dependencies, the asset-free
+game template and packaging tools are already included. No ZIP extraction,
+Python installation, compiler, administrator access or additional download is
+needed to create a folder, exFAT image or native homebrew PKG on Windows x64.
 
-Windows 10/11 x64
-1. Install Python 3.10 or newer from python.org (if needed).
-2. Extract this entire builder ZIP and double-click Start-Builder.cmd.
-3. Select a detected PC installation, or Browse to a custom/portable location.
-4. Choose the output folder and Game folder, exFAT image, or native PKG/fPKG.
-5. Confirm permission to use your local resources, then select Build install.
+1. Select a detected PC installation or Browse to your custom/portable folder.
+2. Choose an output folder and Game folder, exFAT image or Native PKG / fPKG.
+3. Confirm permission to use your resources, then select Build install.
+4. Install the completed output using your compatible PS5 homebrew setup.
 
-The launcher installs pinned Python dependencies in a local .venv. On first
-exFAT/PKG use the builder downloads and checksum-verifies the packaging backend
-from its official source/release. No additional console file transfer is needed.
-It does not install another desktop app or require administrator access or WSL.
+Your personal assets are added locally. First launch on PS5 prepares them
+automatically; no separate loose file, FTP transfer or import selection is
+required. Songs, profiles and scores are preserved. No songs are included.
+These are native homebrew/debug PKGs, not retail-signed applications. The new
+bundled package backend needs a fresh physical PS5 installation test.
 
-Use the resulting title folder or container with your compatible PS5 homebrew
-setup. These are native homebrew/debug PKGs, not retail-signed applications.
-First launch prepares the included personal assets automatically, with a
-progress display. Songs, profiles and scores are preserved. Songs are not
-imported from the PC game. Future code updates preserve your imported assets.
+The public executable contains no original PC artwork, fonts, sounds or songs.
+It reads only your local fingerprinted resources. Unsupported versions fail
+before extraction. The original installation stays unchanged. No protected
+song decryption, executable analysis, keys or access-control bypass is used.
+Keep completed personal installs private: they contain your imported resources.
+Do not upload them to GitHub or distribute them. Only share the public builder.
 
-Detection checks common standalone and launcher gameFiles/version locations;
-custom installations may need Browse. Detection is bounded, not a full-disk
-search. Each asset source is verified before extraction. Only the fingerprinted
-PC resource version in asset-importer/recipes.json is supported; detection of a
-folder does not imply that its installed version is supported.
+The executable uses Packwright 1.3.0 as a separate packaging process. Its full
+corresponding source, GPL-3.0 licence and third-party notices are embedded, along
+with desktop dependency licence notices. No tool modules are injected into the
+game. Source revision: 7039684af5c978ae69ee619d44e98102a61104a6
+https://github.com/itsmemac/Packwright
 
-The PC installation is read only. Failed/cancelled builds stay temporary; an
-existing output is never intentionally overwritten. Choose a new output folder
-for each repeat build. Keep the finished personal install private: it contains
-your imported resources. Do not redistribute it, upload it to GitHub, or attach
-it to issue reports. Only the original public builder ZIP is shareable.
+Developer/source fallback (not required by the Windows executable):
+- Windows source launcher: Start-Builder.cmd explicitly selects Python 3.12 x64
+  and uses .venv-py312, bypassing a failed .venv created with Python 3.15.
+- Linux/macOS: Start-Builder.sh requires Python 3.11+, Tk and venv support and
+  installs requirements.txt. Its pinned source backends download on first use.
+- Freezing an executable requires native Windows CPython 3.12 x64 and
+  PyInstaller 6.16.0; see ps5/tools/build-windows-builder.py.
 
-Linux/macOS: run Start-Builder.sh; Python needs venv and Tk support. Folder and
-exFAT creation use platform-independent Python. Native PKG creation currently
-supports Windows/Linux x64. Windows outputs are tested separately from the
-native PS5 game; see release testing notes for actual hardware coverage.
-
-Command line (after installing requirements.txt):
-  python builder.py --detect
-  python builder.py --game "C:\Games\your PC game" --output "D:\My Builds" --format exfat --authorized
-Formats: folder, exfat, pkg. --pkg-tool accepts the exact pinned native package
-writer instead of downloading it. --cache can select a different tool cache.
-
-Packaging dependencies are downloaded, not bundled or inserted into the game:
-PS5 UltraPack 2.6.1, GPL-3.0 and component licences/notices; its unmodified
-MkPFS exFAT writer is invoked in a separate process, and its standalone native
-package writer is used for PKG builds. Original release/source archives are
-retained in the local tool cache with all licences and source references.
-https://github.com/knutwurst/ps5-ultrapack/releases/tag/v2.6.1
-
-This does not grant permission to extract/reuse the PC resources or resolve
-copyright, licence or anti-circumvention issues. No protected-song decryption
-or access-control bypass is included. See RIGHTS_AND_DISTRIBUTION.md.
+No permission to extract/reuse original resources or legal clearance is granted
+by this tool. Read RIGHTS_AND_DISTRIBUTION.md.

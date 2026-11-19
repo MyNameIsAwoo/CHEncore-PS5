@@ -8790,6 +8790,11 @@ if(loadMidiMapping(midiSetupSource,key,mapped)){midiWizard.draft=std::move(mappe
                 constexpr float textWidth=notesW-padding*2.0f,fontSize=22.0f,headingSize=24.0f;
                 struct Change { const char* heading;const char* body; };
                 static constexpr Change changes[]={
+                    {"1.5.2 - Standalone Windows builder",
+                     "One Windows executable creates your personal install.\n"
+                     "Python and packaging tools are included.\n"
+                     "No separate desktop dependencies or ZIP extraction.\n"
+                     "Your authorized PC assets are added locally."},
                     {"1.5.1 - Personal install builder",
                      "Build your install on PC using your own authorized assets.\n"
                      "Choose a game folder, exFAT image or native homebrew PKG.\n"

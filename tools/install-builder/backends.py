@@ -56,6 +56,24 @@ def download(url, target, wanted, cancel, log):
 def prepare_backend(kind, cache, pkg_tool, cancel, log):
     if kind == 'folder':
         return None
+    embedded = HERE / 'embedded-tools'
+    if (embedded / 'manifest.json').is_file() and not pkg_tool:
+        manifest = json.loads((embedded / 'manifest.json').read_text(encoding='utf-8'))
+        if manifest.get('schema') != 1 or manifest.get('engine') != 'packwright':
+            raise ValueError('The embedded packaging tools are damaged.')
+        executable = manifest.get('executable', '')
+        safe_name(executable)
+        if executable not in manifest.get('files', {}):
+            raise ValueError('Missing embedded packaging executable.')
+        for name, wanted in manifest['files'].items():
+            checkpoint(cancel); safe_name(name)
+            path = embedded / name
+            if not path.is_file() or path.is_symlink() or sha_file(path) != wanted:
+                raise ValueError('An embedded packaging file is missing or damaged: ' + name)
+        return {'packwright': embedded / executable}
+    import sys
+    if getattr(sys, 'frozen', False) and not pkg_tool:
+        raise ValueError('The self-contained builder is missing its embedded tools. Download it again.')
     cache = Path(cache) if cache is not None else cache_directory()
     if kind == 'exfat':
         return download(SOURCE_URL, cache / 'ultrapack-2.6.1-source.zip', SOURCE_SHA, cancel, log)
@@ -94,6 +112,29 @@ def prepare_backend(kind, cache, pkg_tool, cancel, log):
     return tool
 
 def package(kind, app, output, backend, cancel, log):
+    if isinstance(backend, dict):
+        tool = backend['packwright']
+        env = dict(os.environ, PACKWRIGHT_DATA=str(app.parent / 'packaging-state'),
+                   DOTNET_SYSTEM_GLOBALIZATION_INVARIANT='1', DOTNET_CLI_TELEMETRY_OPTOUT='1')
+        command = [tool, 'convert', app, '--to', kind, '-o', output, '--no-ampr']
+        if kind == 'pkg': command += ['--compression', 'stored', '--deterministic', '--drm', 'free']
+        run_process(command, cancel, log, env)
+        if not output.is_file(): raise ValueError('The embedded tool did not create the selected output.')
+        run_process([tool, 'verify', output], cancel, log, env)
+        with tempfile.TemporaryDirectory(prefix='encore-check-', dir=output.parent) as directory:
+            extracted = Path(directory) / 'title'
+            run_process([tool, 'extract', output, '-o', extracted], cancel, log, env)
+            pack_name = 'assets/EncoreAssets-v1.encore-assets'
+            # Verify the payload that matters for personal setup and keep the
+            # native executable/modules unchanged by this packaging backend.
+            for name in [pack_name, 'eboot.bin', 'sce_module/encore-engine.prx', 'sce_sys/about/right.sprx']:
+                if sha_file(app / name) != sha_file(extracted / name):
+                    raise ValueError('Container readback changed a required title file: ' + name)
+            original = json.loads((app / 'sce_sys/param.json').read_text())
+            actual = json.loads((extracted / 'sce_sys/param.json').read_text())
+            if any(original[key] != actual[key] for key in ('titleId', 'contentId', 'contentVersion')):
+                raise ValueError('Container readback changed the title identity.')
+        return
     if kind == 'exfat':
         # Execute the unmodified open-source exFAT writer in a separate Python
         # process. Its complete pinned source/licence ZIP remains in the cache.
@@ -111,7 +152,7 @@ def package(kind, app, output, backend, cancel, log):
                         extracted.add(name)
             if extracted != names:
                 raise ValueError('The exFAT tool archive is incomplete.')
-            run_process([sys_python(), HERE / 'exfat_backend.py', work, app, output], cancel, log)
+            run_process(helper_command('exfat', work, app, output), cancel, log)
         return
     param = json.loads((app / 'sce_sys/param.json').read_text(encoding='utf-8'))
     env = dict(os.environ, DOTNET_SYSTEM_GLOBALIZATION_INVARIANT='1',
@@ -127,7 +168,7 @@ def package(kind, app, output, backend, cancel, log):
         # Nonzero process status is necessary but the writer also reports its
         # structural validation result as JSON; explicitly reject failures.
         result = work / 'validation.json'
-        run_process([sys_python(), HERE / 'validate_pkg.py', backend, files[0], result], cancel, log, env)
+        run_process(helper_command('validate-pkg', backend, files[0], result), cancel, log, env)
         if json.loads(result.read_text())['fail']:
             raise ValueError('Native package validation failed.')
         files[0].replace(output)
@@ -135,3 +176,9 @@ def package(kind, app, output, backend, cancel, log):
 def sys_python():
     import sys
     return sys.executable
+
+def helper_command(kind, *args):
+    import sys
+    if getattr(sys, 'frozen', False):
+        return [sys.executable, '--internal-' + kind, *args]
+    return [sys.executable, HERE / ('exfat_backend.py' if kind == 'exfat' else 'validate_pkg.py'), *args]

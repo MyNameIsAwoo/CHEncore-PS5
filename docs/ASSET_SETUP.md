@@ -4,15 +4,19 @@ The public CH: Encore download contains the desktop builder and an **asset-free 
 
 Use only resources you have permission to extract and use. Possession of a PC installation does not itself grant that permission or resolve the original licence restrictions. See [rights and distribution notes](RIGHTS_AND_DISTRIBUTION.md).
 
-## Build on your PC
+## Build on Windows
 
-1. Download and extract the complete **desktop-builder ZIP** outside your PC game installation.
-2. Install Python 3.10 or newer if needed. On Windows, double-click **Start-Builder.cmd**. On Linux/macOS, run **Start-Builder.sh** (Python needs Tk and venv support).
-3. Choose a detected installation, or use **Browse** to select your standalone/portable installation or a launcher-managed game folder. You can select its `*_Data` folder directly. Browse is needed for locations outside the bounded common-folder scan.
-4. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**. The PKG backend currently supports Windows/Linux x64; folder and exFAT creation use portable Python.
-5. Confirm permission to use the local resources, then select **Build install**.
+Download **CH_Encore_1.5.2_Install_Builder.exe** and double-click it. It bundles Python 3.12, the importer and its dependencies, the asset-free game template, and the packaging tools. **No ZIP extraction, Python installation, compiler or dependency downloads are required.** It builds offline on Windows x64 after the initial download.
 
-The Windows launcher creates a local Python environment and installs pinned dependencies. On first exFAT/PKG build, verified open-source packaging tools are downloaded from their official release/source archives into the desktop tool cache. No administrator access or WSL is required. Tools are separate processes and never inject modules into the title.
+1. Choose a detected installation, or **Browse** to your standalone/portable installation or launcher-managed game folder. You can select its `*_Data` folder directly.
+2. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**.
+3. Confirm permission to use the local resources, then select **Build install**.
+
+The included Packwright backend is built from pinned open source and runs as a separate process. Its source/licence/notices are embedded alongside the tool; no modules are injected into the game. The new bundled PKG backend requires a fresh physical PS5 installation test. Desktop validation alone does not establish console compatibility.
+
+## Source builder / Linux and macOS
+
+The source builder remains in `tools/install-builder`. On Linux/macOS, use Python 3.11+ with Tk and venv, then run **Start-Builder.sh**. For Windows source development, **Start-Builder.cmd** explicitly selects Python 3.12 x64 and uses `.venv-py312`; the failed Python 3.15 `.venv` is ignored. The source workflow installs pinned dependencies and downloads its packaging tools on first use. It is separate from the self-contained Windows executable.
 
 Detection and compatibility are separate: **only the resource fingerprints in `asset-importer/recipes.json` are supported**. An unsupported PC version is rejected before extraction or packaging-tool download. Selecting a launcher executable does not select a game installation; choose its installed game folder instead.
 

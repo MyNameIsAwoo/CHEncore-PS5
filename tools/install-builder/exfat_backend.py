@@ -5,8 +5,8 @@ import hashlib
 from pathlib import Path
 import sys
 
-def main():
-    dependencies, source, output = map(Path, sys.argv[1:])
+def main(arguments=None):
+    dependencies, source, output = map(Path, sys.argv[1:] if arguments is None else arguments)
     sys.path.insert(0, str(dependencies))
     from mkpfs.exfat_writer import write_exfat_image
     from mkpfs.exfat import ExfatReader

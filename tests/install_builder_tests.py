@@ -122,4 +122,24 @@ class BuilderTests(unittest.TestCase):
         event = threading.Event(); event.set()
         self.assertEqual(core.detect_installations([self.root], event), [])
 
+    def test_frozen_helper_dispatch_and_embedded_tools_need_no_download(self):
+        import backends
+        with patch.object(sys, 'frozen', True, create=True):
+            self.assertEqual(backends.helper_command('exfat', 'a', 'b', 'c'),
+                             [sys.executable, '--internal-exfat', 'a', 'b', 'c'])
+        tools = self.bundle / 'embedded-tools'; tools.mkdir()
+        tool = tools / 'packwright/Packwright.exe'; tool.parent.mkdir(); tool.write_bytes(b'fixture')
+        manifest = {'schema': 1, 'engine': 'packwright', 'executable': 'packwright/Packwright.exe',
+                    'files': {'packwright/Packwright.exe': core.sha_file(tool)}}
+        (tools / 'manifest.json').write_text(json.dumps(manifest))
+        with patch.object(backends, 'HERE', self.bundle), patch.object(backends, 'download', side_effect=AssertionError('unexpected download')):
+            result = backends.prepare_backend('pkg', None, None, threading.Event(), lambda _: None)
+            self.assertEqual(result, {'packwright': tool})
+            tool.write_bytes(b'damaged')
+            with self.assertRaisesRegex(ValueError, 'damaged'):
+                backends.prepare_backend('exfat', None, None, threading.Event(), lambda _: None)
+        with patch.object(backends, 'HERE', self.root / 'absent'), patch.object(sys, 'frozen', True, create=True):
+            with self.assertRaisesRegex(ValueError, 'missing its embedded'):
+                backends.prepare_backend('pkg', None, None, threading.Event(), lambda _: None)
+
 if __name__ == '__main__': unittest.main()

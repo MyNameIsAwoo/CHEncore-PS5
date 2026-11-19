@@ -151,6 +151,14 @@ def gui():
 
 
 def main():
+    # A frozen executable is its own helper host; it cannot launch .py files
+    # with sys.executable as a normal installed Python interpreter would.
+    if len(sys.argv) > 1 and sys.argv[1] == '--internal-exfat':
+        from exfat_backend import main as helper
+        helper(sys.argv[2:]); return 0
+    if len(sys.argv) > 1 and sys.argv[1] == '--internal-validate-pkg':
+        from validate_pkg import main as helper
+        helper(sys.argv[2:]); return 0
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--game', type=Path)
     p.add_argument('--output', type=Path)
@@ -159,8 +167,30 @@ def main():
     p.add_argument('--pkg-tool', type=Path)
     p.add_argument('--cache', type=Path)
     p.add_argument('--detect', action='store_true')
+    p.add_argument('--self-check', action='store_true', help='Verify the bundled game and packaging tools without PC assets')
+    p.add_argument('--offline', action='store_true', help='Disallow Python network downloads during this run')
+    p.add_argument('--log-file', type=Path, help='Write command-line diagnostics to this file')
     p.add_argument('--authorized', action='store_true', help='Confirm permission to extract/use your selected local resources')
     args = p.parse_args()
+    if args.log_file:
+        stream = args.log_file.open('w', encoding='utf-8', buffering=1)
+        sys.stdout = sys.stderr = stream
+    if args.offline:
+        import urllib.request
+        def no_download(*_args, **_kwargs):
+            raise OSError('Offline test: a network download was requested.')
+        urllib.request.urlopen = no_download
+    if args.self_check:
+        import tempfile
+        from build_core import template_config, unpack_template
+        from backends import prepare_backend
+        config = template_config(args.bundle)
+        with tempfile.TemporaryDirectory(prefix='encore-self-check-') as directory:
+            unpack_template(args.bundle, Path(directory), config, threading.Event())
+        backend = prepare_backend('pkg', None, None, threading.Event(), print)
+        if not isinstance(backend, dict): raise ValueError('This executable needs its embedded packaging backend.')
+        print('PASS self-contained game template and packaging tools; Python ' + sys.version.split()[0])
+        return 0
     if args.detect:
         for folder in detect_installations(): print(folder)
         return 0
@@ -174,4 +204,12 @@ def main():
         print('Build failed: ' + str(exc), file=sys.stderr); return 1
     return 0
 
-if __name__ == '__main__': sys.exit(main())
+if __name__ == '__main__':
+    import multiprocessing
+    multiprocessing.freeze_support()
+    if getattr(sys, 'frozen', False):
+        # --windowed builds do not necessarily have console streams. The GUI
+        # has its own log, and CLI users can explicitly select --log-file.
+        if sys.stdout is None: sys.stdout = open(os.devnull, 'w')
+        if sys.stderr is None: sys.stderr = open(os.devnull, 'w')
+    sys.exit(main())

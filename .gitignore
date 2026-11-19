@@ -13,6 +13,7 @@ userdata/
 /screenshots/
 **/__pycache__/
 .venv/
+.venv-py312/
 *.pyc
 
 # User-supplied resources and importer output must never be committed.

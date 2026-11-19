@@ -6,30 +6,24 @@ Huge thanks to my cousin, [Eddie Rubio](https://music.youtube.com/channel/UCmQMU
 
 A native PS5 rhythm game with guitar/bass, drums and local multiplayer.
 
-**v1.5.1 — Personal install builder** moves asset setup onto your PC. The public download contains an asset-free game template and a desktop builder. Your own authorized PC resources are added locally to a folder install, exFAT image or native homebrew PKG. No original PC resources or songs are supplied by this project.
+**v1.5.2 — Standalone Windows builder** includes Python and its packaging tools in one executable. The public download contains an asset-free game template and a desktop builder. Your own authorized PC resources are added locally to a folder install, exFAT image or native homebrew PKG. No original PC resources or songs are supplied by this project.
 
 ## Install on PS5
 
-**[Download the v1.5.1 Desktop Builder](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/download/v1.5.1/CH_Encore_1.5.1_desktop-builder.zip)** · [Release notes](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/tag/v1.5.1) · [Detailed setup guide](docs/ASSET_SETUP.md)
+**[Download the Windows Install Builder (.exe)](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/download/v1.5.2/CH_Encore_1.5.2_Install_Builder.exe)** · [Release notes](https://github.com/MyNameIsAwoo/CHEncore-PS5/releases/tag/v1.5.2) · [Detailed setup guide](docs/ASSET_SETUP.md)
 
-You build your personal install on your PC, then install the resulting folder or container on your PS5. **You do not need to copy a separate asset pack to the console or use FTP for asset setup.**
+**One executable. No ZIP extraction, Python installation or dependency downloads.** It includes the asset-free game template and everything needed to create your personal install on Windows x64. Your PC assets are read locally and are never supplied by this project.
 
-1. Install **[Python 3.10 or newer](https://www.python.org/downloads/)** if you do not have it. Windows includes Tk with the standard Python installer; Linux/macOS also need Tk and venv support.
-2. Download the desktop-builder ZIP above and **extract the entire archive** outside your PC game installation.
-3. On Windows, double-click **Start-Builder.cmd**. On Linux/macOS, run **Start-Builder.sh**. The launcher installs its pinned dependencies; the first run needs an internet connection.
-4. Select a detected PC game installation, or choose **Browse** for a custom location. Select the installed game folder or its `*_Data` folder, rather than the launcher executable. Only the resource version supported by the importer is accepted.
-5. Choose an output folder and one of the formats below, confirm permission to use your local resources, then select **Build install**. Packaging tools are downloaded and verified automatically when needed.
-6. Open the completed output folder and install its **PPSA99200 folder**, **.exfat image**, or **.pkg** using your compatible PS5 homebrew setup. Keep the complete title folder intact. **First launch prepares your included personal assets automatically**, with a progress display.
+1. Download **CH_Encore_1.5.2_Install_Builder.exe** and double-click it.
+2. Select a detected PC game installation, or choose **Browse** for a custom location. Select the installed game folder or its `*_Data` folder. Only the resource version supported by the importer is accepted.
+3. Choose an output folder and **Game folder**, **exFAT image**, or **Native homebrew PKG / fPKG**. Confirm permission to use your local resources, then select **Build install**.
+4. Install the resulting `PPSA99200` folder, `.exfat` image or `.pkg` using your compatible PS5 homebrew setup. Keep the complete title folder intact. **First launch prepares your included assets automatically**; no separate console asset transfer or import selection is needed.
 
-| Builder choice | Output | Desktop support |
-| --- | --- | --- |
-| Game folder | Complete `PPSA99200` title folder | Windows / Linux / macOS |
-| exFAT image | `.exfat` image for a compatible image mounter | Windows / Linux / macOS |
-| Native homebrew PKG / fPKG | `.pkg` for a compatible native PS5 package setup | Windows / Linux x64 |
-
-These are homebrew/debug packages, not retail-signed applications. Desktop builds were checked on Windows and Linux; macOS and the new first-launch path still need physical-platform testing.
+The Windows executable can build offline once downloaded. It does not install another desktop app or require administrator access. Native PKGs are homebrew/debug packages, not retail-signed applications; the bundled packaging backend still needs a fresh physical PS5 install test.
 
 **Songs are separate.** No songs are included or imported from the PC installation. Add authorized charts through Encore Browser, `/data/homebrew/SONGS`, or a root-level `SONGS` folder on an exFAT drive. Nested collections are supported.
+
+For Linux/macOS and developers, the Python source builder remains available in `tools/install-builder`; see the setup guide. Windows source launchers explicitly use Python 3.12 x64 to avoid unsupported default interpreters.
 
 Read [Asset setup](docs/ASSET_SETUP.md) for requirements and supported platforms. Generated personal installs contain your imported resources and must stay private. Only the unmodified public builder is shareable. No permission to extract/reuse the original resources or developer approval is claimed; see [rights and distribution](docs/RIGHTS_AND_DISTRIBUTION.md).
 

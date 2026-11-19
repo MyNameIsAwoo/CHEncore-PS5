@@ -5,11 +5,11 @@ Use this tool only with resources you are authorized to extract and use.
 Possessing a PC installation does not by itself establish that permission.
 This does not grant rights or override the original developer's licence.
 
-Windows: install Python 3.10 or newer, extract this folder outside the PC
+Windows source fallback: install Python 3.12 x64, extract this folder outside the PC
 installation, and double-click Create-Asset-Pack.cmd. Enter the installation
 folder when asked. It installs the pinned dependencies into a local .venv.
 
-Linux/macOS:
+Linux/macOS (Python 3.11+):
   python3 -m venv .venv
   .venv/bin/python -m pip install -r requirements.txt
   .venv/bin/python create_asset_pack.py /path/to/your/PC/game
